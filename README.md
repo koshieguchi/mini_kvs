@@ -55,3 +55,12 @@ This will generate the experiment results in CSV format in the `exps` directory.
 ## Code Style
 
 Follow the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html).
+
+## Bazel commands
+
+```sh
+bazel build //...
+bazel test //...
+bazel run //...
+bazel clean --expunge
+```

@@ -39,3 +39,9 @@ tests/test_db*
 exps/results/*.csv
 exps/experiment_db*
 bin/
+
+# Bazel specific
+/bazel-*
+/bazel-bin
+/bazel-out
+/bazel-testlogs
