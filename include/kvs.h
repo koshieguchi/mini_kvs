@@ -1,5 +1,5 @@
-#ifndef DB_H
-#define DB_H
+#ifndef KVS_H
+#define KVS_H
 
 #include <cstdint>
 #include <map>
@@ -14,10 +14,10 @@
 /**
  * Class representing the key-value database.
  */
-class Db {
+class KVS {
    private:
     Memtable *memtable;
-    std::string dbPath;
+    std::string kvsPath;
     std::vector<SST *> allSSTs;
     BufferPool *bufferPool;
     SearchType searchType;
@@ -26,16 +26,16 @@ class Db {
 
    public:
     /**
-     * Creates a new Db object with given search type.
+     * Creates a new KVS object with given search type.
      *
      * @param memtableSize the maximum size of the memtable.
      * @param searchType the search type of SST files.
-     * @param bufferPool the buffer pool of the DB.
-     * @param lsmTree the LSM-Tree data structure for the Db.
+     * @param bufferPool the buffer pool of the KVS.
+     * @param lsmTree the LSM-Tree data structure for the KVS.
      */
-    explicit Db(int memtableSize, SearchType searchType, BufferPool *bufferPool = nullptr, LSMTree *lsmTree = nullptr);
+    explicit KVS(int memtableSize, SearchType searchType, BufferPool *bufferPool = nullptr, LSMTree *lsmTree = nullptr);
 
-    ~Db();
+    ~KVS();
 
     /**
      * Opens the database at given path and prepares it to run.
@@ -94,7 +94,7 @@ class Db {
     void Scan(uint64_t key1, uint64_t key2, std::vector<DataEntry_t> &scanResult);
 
     /**
-     * Resets this db's buffer pool by creating a new extendible hashtable with new min size,
+     * Resets this kvs's buffer pool by creating a new extendible hashtable with new min size,
      * max size, and eviction policy for it.
      *
      * This method is used in experiments.
@@ -106,4 +106,4 @@ class Db {
     void ResetBufferPool(int bufferPoolMinSize, int bufferPoolMaxSize, EvictionPolicyType evictionPolicyType);
 };
 
-#endif  // DB_H
+#endif  // KVS_H

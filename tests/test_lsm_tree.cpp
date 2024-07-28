@@ -28,11 +28,11 @@ class TestLSMTree : public TestBase {
     static const int bloomFilterBitsPerEntry = 10;
     static const int inputBufferCapacity = 8;
     static const int outputBufferCapacity = 256;
-    inline static std::string dbDirPath = "./db_lsm_tree";
+    inline static std::string kvsDirPath = "./kvs_lsm_tree";
 
     static LSMTree *Setup() {
-        if (!fs::exists(dbDirPath)) {
-            bool createDirRes = fs::create_directories(dbDirPath);
+        if (!fs::exists(kvsDirPath)) {
+            bool createDirRes = fs::create_directories(kvsDirPath);
             if (!createDirRes) {
                 return nullptr;
             }
@@ -45,7 +45,7 @@ class TestLSMTree : public TestBase {
             auto *firstLevel = new Level(0, bloomFilterBitsPerEntry, inputBufferCapacity, outputBufferCapacity);
             lsmTree->AddLevel(firstLevel);
         }
-        lsmTree->GetLevels()[0]->WriteDataToLevel(data, searchType, dbDirPath);
+        lsmTree->GetLevels()[0]->WriteDataToLevel(data, searchType, kvsDirPath);
     }
 
     /**
@@ -64,14 +64,14 @@ class TestLSMTree : public TestBase {
         // 2. Run and check expected values
         bool result = true;
 
-        lsmTree->WriteMemtableData(data, searchType, dbDirPath);
-        std::string fileName = dbDirPath + "/level0-0.sst";
+        lsmTree->WriteMemtableData(data, searchType, kvsDirPath);
+        std::string fileName = kvsDirPath + "/level0-0.sst";
         result &= lsmTree->GetLevels().size() == 1;
         result &= lsmTree->GetLevels()[0]->GetSSTFiles().size() == 1;
         result &= lsmTree->GetLevels()[0]->GetSSTFiles()[0]->GetFileName() == fileName;
 
         // 3. Clean up
-        fs::remove_all(dbDirPath);
+        fs::remove_all(kvsDirPath);
         return result;
     }
 
@@ -96,8 +96,8 @@ class TestLSMTree : public TestBase {
         // 2. Run and check expected values
         bool result = true;
 
-        lsmTree->MaintainLevelCapacityAndCompact(lsmTree->GetLevels()[0], dbDirPath);
-        std::string fileName = dbDirPath + "/level1-0.sst";
+        lsmTree->MaintainLevelCapacityAndCompact(lsmTree->GetLevels()[0], kvsDirPath);
+        std::string fileName = kvsDirPath + "/level1-0.sst";
         result &= lsmTree->GetLevels().size() == 2;
         result &= lsmTree->GetLevels()[0]->GetSSTFiles().empty();
         result &= lsmTree->GetLevels()[1]->GetSSTFiles().size() == 1;
@@ -125,7 +125,7 @@ class TestLSMTree : public TestBase {
         std::vector<DataEntry_t> data2;
         GetData(512, 2 * 512 + 1, 10, data2, 1);
         WriteDataToLSMTree(lsmTree, data2);
-        lsmTree->MaintainLevelCapacityAndCompact(lsmTree->GetLevels()[0], dbDirPath);
+        lsmTree->MaintainLevelCapacityAndCompact(lsmTree->GetLevels()[0], kvsDirPath);
 
         std::vector<DataEntry_t> data3;
         GetData(2 * 512 + 1, 3 * 512 + 1, 10, data3, 1);
@@ -143,15 +143,15 @@ class TestLSMTree : public TestBase {
         uint64_t v5 = lsmTree->Get(13133888888);
         result &= lsmTree->GetLevels().size() == 2;
         result &= lsmTree->GetLevels()[0]->GetSSTFiles().size() == 1;
-        result &= lsmTree->GetLevels()[0]->GetSSTFiles()[0]->GetFileName() == dbDirPath + "/level0-0.sst";
+        result &= lsmTree->GetLevels()[0]->GetSSTFiles()[0]->GetFileName() == kvsDirPath + "/level0-0.sst";
         result &= lsmTree->GetLevels()[1]->GetSSTFiles().size() == 1;
-        result &= lsmTree->GetLevels()[1]->GetSSTFiles()[0]->GetFileName() == dbDirPath + "/level1-0.sst";
+        result &= lsmTree->GetLevels()[1]->GetSSTFiles()[0]->GetFileName() == kvsDirPath + "/level1-0.sst";
         result &= v1 == 2560 && v2 == 25570 && v3 == 2624000;
         result &= v4 == std::numeric_limits<uint64_t>::max();
         result &= v5 == std::numeric_limits<uint64_t>::max();  // Not found keys
 
         // 3. Clean up
-        fs::remove_all(dbDirPath);
+        fs::remove_all(kvsDirPath);
         return result;
     }
 
@@ -173,7 +173,7 @@ class TestLSMTree : public TestBase {
         std::vector<DataEntry_t> data2;
         expectedValuesSum += GetData(1024, (3 * 1024) + 1, 10, data2, 4);
         WriteDataToLSMTree(lsmTree, data2);
-        lsmTree->MaintainLevelCapacityAndCompact(lsmTree->GetLevels()[0], dbDirPath);
+        lsmTree->MaintainLevelCapacityAndCompact(lsmTree->GetLevels()[0], kvsDirPath);
 
         std::vector<DataEntry_t> data3;
         expectedValuesSum += GetData((3 * 1024) + 1, (5 * 1024) + 1, 10, data3, 4);
@@ -191,15 +191,15 @@ class TestLSMTree : public TestBase {
         }
         result &= lsmTree->GetLevels().size() == 2;
         result &= lsmTree->GetLevels()[0]->GetSSTFiles().size() == 1;
-        result &= lsmTree->GetLevels()[0]->GetSSTFiles()[0]->GetFileName() == dbDirPath + "/level0-0.sst";
+        result &= lsmTree->GetLevels()[0]->GetSSTFiles()[0]->GetFileName() == kvsDirPath + "/level0-0.sst";
         result &= lsmTree->GetLevels()[1]->GetSSTFiles().size() == 1;
-        result &= lsmTree->GetLevels()[1]->GetSSTFiles()[0]->GetFileName() == dbDirPath + "/level1-0.sst";
+        result &= lsmTree->GetLevels()[1]->GetSSTFiles()[0]->GetFileName() == kvsDirPath + "/level1-0.sst";
 
         // We will not have the keys equal to 1 and 2, which will have values 10 and 20.
         result &= ((expectedValuesSum - (10 + 20)) == valuesSumInScan);
 
         // 3. Clean up
-        fs::remove_all(dbDirPath);
+        fs::remove_all(kvsDirPath);
         return result;
     }
 
@@ -225,7 +225,7 @@ class TestLSMTree : public TestBase {
         std::vector<DataEntry_t> data2;
         expectedValuesSum += GetData(512, (2 * 512) + 1, defaultValue, data2, 1);
         WriteDataToLSMTree(lsmTree, data2);
-        lsmTree->MaintainLevelCapacityAndCompact(lsmTree->GetLevels()[0], dbDirPath);
+        lsmTree->MaintainLevelCapacityAndCompact(lsmTree->GetLevels()[0], kvsDirPath);
 
         std::vector<DataEntry_t> data3;
         // Write some deleted keys
@@ -256,13 +256,13 @@ class TestLSMTree : public TestBase {
         }
         result &= lsmTree->GetLevels().size() == 2;
         result &= lsmTree->GetLevels()[0]->GetSSTFiles().size() == 1;
-        result &= lsmTree->GetLevels()[0]->GetSSTFiles()[0]->GetFileName() == dbDirPath + "/level0-0.sst";
+        result &= lsmTree->GetLevels()[0]->GetSSTFiles()[0]->GetFileName() == kvsDirPath + "/level0-0.sst";
         result &= lsmTree->GetLevels()[1]->GetSSTFiles().size() == 1;
-        result &= lsmTree->GetLevels()[1]->GetSSTFiles()[0]->GetFileName() == dbDirPath + "/level1-0.sst";
+        result &= lsmTree->GetLevels()[1]->GetSSTFiles()[0]->GetFileName() == kvsDirPath + "/level1-0.sst";
         result &= expectedValuesSum == valuesSumInScan;
 
         // 3. Clean up
-        fs::remove_all(dbDirPath);
+        fs::remove_all(kvsDirPath);
         return result;
     }
 

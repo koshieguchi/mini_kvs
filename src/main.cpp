@@ -1,17 +1,17 @@
 #include <iostream>
 
-#include "db.h"
+#include "kvs.h"
 
 /* These are some examples of how a user should create and call the database. */
 
-void runTestOnDbWithBinarySearch() {
+void runTestOnKVSWithBinarySearch() {
     // Memtable with size 512 pages
     int memtableNumOfElements = (512 * 4096) / 16;
     int minBufferPoolSize = 5;
     int maxBufferPoolSize = 16;
     auto bufferPool = new BufferPool(minBufferPoolSize, maxBufferPoolSize, EvictionPolicyType::LRU_t);
-    Db *db = new Db(memtableNumOfElements, SearchType::BINARY_SEARCH, bufferPool);
-    db->Open("./my_db");
+    KVS *kvs = new KVS(memtableNumOfElements, SearchType::BINARY_SEARCH, bufferPool);
+    kvs->Open("./my_kvs");
 
     // Test Put
     // Write 512 pages of key-value pairs and one extra page
@@ -19,23 +19,23 @@ void runTestOnDbWithBinarySearch() {
     uint64_t expectedValuesSum = 0;
     for (uint64_t i = 1; i <= 513; i++) {
         for (uint64_t t = i * 256; t < (i + 1) * 256; t++) {
-            db->Put(t, t * 10);
+            kvs->Put(t, t * 10);
             expectedValuesSum += t * 10;
         }
     }
 
     // Test Get
-    uint64_t v1 = db->Get(256);
+    uint64_t v1 = kvs->Get(256);
     std::cout << "v1 is: " << v1 << " " << (v1 == 2560) << std::endl;
 
-    uint64_t v2 = db->Get(131327);
+    uint64_t v2 = kvs->Get(131327);
     std::cout << "v2 is: " << v2 << " " << (v2 == 1313270) << std::endl;
 
     // Test Get on all
     uint64_t valuesSumInGet = 0;
     for (uint64_t i = 1; i <= 513; i++) {
         for (uint64_t t = i * 256; t < (i + 1) * 256; t++) {
-            uint64_t value = db->Get(t);
+            uint64_t value = kvs->Get(t);
             valuesSumInGet += value;
         }
     }
@@ -48,7 +48,7 @@ void runTestOnDbWithBinarySearch() {
 
     std::vector<DataEntry_t> nodesList;
     // The ranges of keys inside the file is 0 <= ... <= 131583, but we test it on ranges beyond.
-    db->Scan(0, 131583 + 10, nodesList);
+    kvs->Scan(0, 131583 + 10, nodesList);
 
     uint64_t valuesSumInScan = 0;
     for (DataEntry_t pair : nodesList) {
@@ -62,40 +62,40 @@ void runTestOnDbWithBinarySearch() {
                   << " while valuesSumInScan: " << valuesSumInScan << std::endl;
     }
 
-    db->Close();
+    kvs->Close();
 }
 
-void runTestOnDbWithIncompleteBTree() {
+void runTestOnKVSWithIncompleteBTree() {
     // Memtable with size 510 pages
     int memtableNumOfElements = (510 * 4096) / 16;
     int minBufferPoolSize = 5;
     int maxBufferPoolSize = 16;
     auto bufferPool = new BufferPool(minBufferPoolSize, maxBufferPoolSize, EvictionPolicyType::LRU_t);
-    Db *db = new Db(memtableNumOfElements, SearchType::B_TREE_SEARCH, bufferPool);
-    db->Open("./my_db_incomplete_BTree");
+    KVS *kvs = new KVS(memtableNumOfElements, SearchType::B_TREE_SEARCH, bufferPool);
+    kvs->Open("./my_kvs_incomplete_BTree");
     // Write 512 pages of key-value pairs and one extra page
     // to force the memtable to write its content to an sst file.
     uint64_t expectedValuesSum = 0;
     uint64_t expectedKeysSum = 0;
     for (int i = 0; i < 512; i++) {
         for (uint64_t t = i * 256; t < (i + 1) * 256; t++) {
-            db->Put(t, t * 10);
+            kvs->Put(t, t * 10);
             expectedKeysSum += t;
             expectedValuesSum += t * 10;
         }
     }
 
-    uint64_t v1 = db->Get(256);
+    uint64_t v1 = kvs->Get(256);
     std::cout << "v1 is: " << v1 << " and " << (v1 == 2560) << std::endl;  // expected == 2560
 
-    uint64_t v2 = db->Get(130559);
+    uint64_t v2 = kvs->Get(130559);
     std::cout << "v2 is: " << v2 << " and " << (v2 == 1305590) << std::endl;  // expected == 1305590
 
     // Test Get on all
     uint64_t valuesSumInGet = 0;
     for (uint64_t i = 0; i < 512; i++) {
         for (uint64_t t = i * 256; t < (i + 1) * 256; t++) {
-            uint64_t value = db->Get(t);
+            uint64_t value = kvs->Get(t);
             valuesSumInGet += value;
         }
     }
@@ -110,7 +110,7 @@ void runTestOnDbWithIncompleteBTree() {
     uint64_t keysSumInScan = 0;
     uint64_t valuesSumInScan = 0;
     std::vector<DataEntry_t> nodesList;
-    db->Scan(270, 512 * 256, nodesList);
+    kvs->Scan(270, 512 * 256, nodesList);
     expectedKeysSum = expectedKeysSum - (269 * 270 / 2);
     for (DataEntry_t pair : nodesList) {
         keysSumInScan += pair.first;
@@ -123,18 +123,18 @@ void runTestOnDbWithIncompleteBTree() {
         std::cout << "Tests Failed in scan! " << " expectedKeysSum: " << expectedKeysSum
                   << " while keysSumInScan: " << keysSumInScan << std::endl;
     }
-    db->Close();
-    // std::filesystem::remove_all("my_db_incomplete_BTree");
+    kvs->Close();
+    // std::filesystem::remove_all("my_kvs_incomplete_BTree");
 }
 
-void runTestOnDbWithCompleteBTree() {
+void runTestOnKVSWithCompleteBTree() {
     // Memtable with size 512 pages
     int memtableNumOfElements = (512 * 4096) / 16;
     int minBufferPoolSize = 5;
     int maxBufferPoolSize = 16;
     auto bufferPool = new BufferPool(minBufferPoolSize, maxBufferPoolSize, EvictionPolicyType::CLOCK_t);
-    Db *db = new Db(memtableNumOfElements, SearchType::B_TREE_SEARCH, bufferPool);
-    db->Open("./my_db");
+    KVS *kvs = new KVS(memtableNumOfElements, SearchType::B_TREE_SEARCH, bufferPool);
+    kvs->Open("./my_kvs");
 
     // Test Put
     // Write 512 pages of key-value pairs and one extra page
@@ -142,23 +142,23 @@ void runTestOnDbWithCompleteBTree() {
     uint64_t expectedValuesSum = 0;
     for (uint64_t i = 0; i <= 512; i++) {
         for (uint64_t t = i * 256; t < (i + 1) * 256; t++) {
-            db->Put(t, t * 10);
+            kvs->Put(t, t * 10);
             expectedValuesSum += t * 10;
         }
     }
 
     // Test Get
-    uint64_t v1 = db->Get(256);
+    uint64_t v1 = kvs->Get(256);
     std::cout << "v1 is: " << v1 << " " << (v1 == 2560) << std::endl;  // expected == 2560
 
-    uint64_t v2 = db->Get(2557);
+    uint64_t v2 = kvs->Get(2557);
     std::cout << "v2 is: " << v2 << " " << (v2 == 25570) << std::endl;  // expected == 25570
 
     // Test Get on all
     uint64_t valuesSumInGet = 0;
     for (uint64_t i = 0; i <= 512; i++) {
         for (uint64_t t = i * 256; t < (i + 1) * 256; t++) {
-            uint64_t value = db->Get(t);
+            uint64_t value = kvs->Get(t);
             valuesSumInGet += value;
         }
     }
@@ -172,7 +172,7 @@ void runTestOnDbWithCompleteBTree() {
     // Test Scan
     uint64_t valuesSumInScan = 0;
     std::vector<DataEntry_t> nodesList;
-    db->Scan(0, 131329, nodesList);  // There are 513 pages of length 256. So we have from 0 to 131327.
+    kvs->Scan(0, 131329, nodesList);  // There are 513 pages of length 256. So we have from 0 to 131327.
     for (DataEntry_t pair : nodesList) {
         valuesSumInScan += pair.second;
     }
@@ -182,37 +182,37 @@ void runTestOnDbWithCompleteBTree() {
         std::cout << "Tests Failed in scan! " << " expectedValuesSum: " << expectedValuesSum
                   << " while valuesSumInScan: " << valuesSumInScan << std::endl;
     }
-    db->Close();
+    kvs->Close();
 }
 
-void runTestOnDbWithBTreeMediumFile() {
+void runTestOnKVSWithBTreeMediumFile() {
     // Btree with < 0.5GB file
     // Memtable will have 512 * 256 pages
     int memtableNumOfElements = ((511 * 256) * 4096) / 16;
     int minBufferPoolSize = 5;
     int maxBufferPoolSize = 16;
     auto bufferPool = new BufferPool(minBufferPoolSize, maxBufferPoolSize, EvictionPolicyType::LRU_t);
-    Db *db = new Db(memtableNumOfElements, SearchType::B_TREE_SEARCH, bufferPool);
-    db->Open("./my_db");
+    KVS *kvs = new KVS(memtableNumOfElements, SearchType::B_TREE_SEARCH, bufferPool);
+    kvs->Open("./my_kvs");
     // Write 512 * 256 pages of key-value pairs and one extra page
     // to force the memtable to write its content to an sst file.
     uint64_t expectedValuesSum = 0;
     for (uint64_t i = 0; i < 512 * 256; i++) {
         for (uint64_t t = i * 256; t < (i + 1) * 256; t++) {
-            db->Put(t, t * 10);
+            kvs->Put(t, t * 10);
             expectedValuesSum += t * 10;
         }
     }
 
-    uint64_t v1 = db->Get(256);
+    uint64_t v1 = kvs->Get(256);
     std::cout << "v1 is: " << v1 << std::endl;  // == 2560
 
-    uint64_t v2 = db->Get(131072);
+    uint64_t v2 = kvs->Get(131072);
     std::cout << "v2 is: " << v2 << std::endl;  // == 1310720
 
     uint64_t valuesSum = 0;
     std::vector<DataEntry_t> nodesList;
-    db->Scan(0, 512 * 256 * 256, nodesList);
+    kvs->Scan(0, 512 * 256 * 256, nodesList);
     for (DataEntry_t pair : nodesList) {
         // std::cout << "(" << pair.first << "," << pair.second << ")" << std::endl;
         valuesSum += pair.second;
@@ -226,36 +226,36 @@ void runTestOnDbWithBTreeMediumFile() {
     }
 }
 
-void runTestOnDbWithBTreeBigFile() {
+void runTestOnKVSWithBTreeBigFile() {
     // Btree with ~ 1GB file
     // Memtable will have 512 * 512 pages
     int memtableNumOfElements = ((512 * 512) * 4096) / 16;
     int minBufferPoolSize = 5;
     int maxBufferPoolSize = 16;
     auto bufferPool = new BufferPool(minBufferPoolSize, maxBufferPoolSize, EvictionPolicyType::LRU_t);
-    Db *db = new Db(memtableNumOfElements, SearchType::B_TREE_SEARCH, bufferPool);
-    db->Open("./my_db");
+    KVS *kvs = new KVS(memtableNumOfElements, SearchType::B_TREE_SEARCH, bufferPool);
+    kvs->Open("./my_kvs");
     // Write 512 * 512 pages of key-value pairs and one extra page
     // to force the memtable to write its content to an sst file.
     uint64_t expectedValuesSum = 0;
     for (uint64_t i = 0; i <= 512 * 512; i++) {
         for (uint64_t t = i * 256; t < (i + 1) * 256; t++) {
-            db->Put(t, t * 10);
+            kvs->Put(t, t * 10);
             expectedValuesSum += t * 10;
         }
     }
 
-    uint64_t v1 = db->Get(256);
+    uint64_t v1 = kvs->Get(256);
     std::cout << "v1 is: " << v1 << std::endl;  // == 2560
 
-    uint64_t v2 = db->Get(131071 + 512);
+    uint64_t v2 = kvs->Get(131071 + 512);
     std::cout << "v2 is: " << v2 << std::endl;  // == 1315830
 
     // Test Get on all
     uint64_t valuesSumInGet = 0;
     for (uint64_t i = 0; i <= 512 * 512; i++) {
         for (uint64_t t = i * 256; t < (i + 1) * 256; t++) {
-            uint64_t value = db->Get(t);
+            uint64_t value = kvs->Get(t);
             valuesSumInGet += value;
         }
     }
@@ -267,23 +267,23 @@ void runTestOnDbWithBTreeBigFile() {
     }
 }
 
-void runLSMTreeGet(Db *db, uint64_t expectedValuesSum) {
+void runLSMTreeGet(KVS *kvs, uint64_t expectedValuesSum) {
     // Test Get
-    uint64_t v1 = db->Get(256);
+    uint64_t v1 = kvs->Get(256);
     std::cout << "v1 is: " << v1 << " " << (v1 == 2560) << std::endl;  // expected == 2560
 
-    uint64_t v2 = db->Get(2557);
+    uint64_t v2 = kvs->Get(2557);
     std::cout << "v2 is: " << v2 << " " << (v2 == 25570) << std::endl;  // expected == 25570
 
-    uint64_t v3 = db->Get(131325);
+    uint64_t v3 = kvs->Get(131325);
     std::cout << "v3 is: " << v3 << " " << (v3 == 1313250) << std::endl;  // expected == 1313250
 
     // Test keys that do not exist
-    uint64_t v4 = db->Get(131330);
+    uint64_t v4 = kvs->Get(131330);
     std::cout << "v4 is: " << v4 << " " << (v4 == std::numeric_limits<uint64_t>::max()) << " NOT FOUND"
               << std::endl;  // expected == std::numeric_limits<uint64_t>::max()
 
-    uint64_t v5 = db->Get(13133888888);
+    uint64_t v5 = kvs->Get(13133888888);
     std::cout << "v5 is: " << v5 << " " << (v5 == std::numeric_limits<uint64_t>::max()) << " NOT FOUND"
               << std::endl;  // expected == std::numeric_limits<uint64_t>::max()
 
@@ -291,7 +291,7 @@ void runLSMTreeGet(Db *db, uint64_t expectedValuesSum) {
     uint64_t valuesSumInGet = 0;
     for (uint64_t i = 0; i <= 512; i++) {
         for (uint64_t t = i * 256; t < (i + 1) * 256; t++) {
-            uint64_t value = db->Get(t);
+            uint64_t value = kvs->Get(t);
             valuesSumInGet += value;
         }
     }
@@ -303,11 +303,11 @@ void runLSMTreeGet(Db *db, uint64_t expectedValuesSum) {
     }
 }
 
-void runLSMTreeScan(Db *db, uint64_t expectedValuesSum) {
+void runLSMTreeScan(KVS *kvs, uint64_t expectedValuesSum) {
     // Test Scan
     uint64_t valuesSumInScan = 0;
     std::vector<DataEntry_t> nodesList;
-    db->Scan(0, 131329, nodesList);  // There are 513 pages of length 256. So we have from 0 to 131327.
+    kvs->Scan(0, 131329, nodesList);  // There are 513 pages of length 256. So we have from 0 to 131327.
     for (DataEntry_t pair : nodesList) {
         valuesSumInScan += pair.second;
     }
@@ -319,7 +319,7 @@ void runLSMTreeScan(Db *db, uint64_t expectedValuesSum) {
     }
 }
 
-void runTestDbWithLSMTree() {
+void runTestKVSWithLSMTree() {
     // Memtable with size 512 pages
     int memtableNumOfElements = (512 * 4096) / 16;
     int minBufferPoolSize = 5;
@@ -330,8 +330,8 @@ void runTestDbWithLSMTree() {
 
     auto bufferPool = new BufferPool(minBufferPoolSize, maxBufferPoolSize, EvictionPolicyType::CLOCK_t);
     auto lsmTree = new LSMTree(bloomFilterBitsPerEntry, inputBufferNumPagesCapacity, outputBufferNumPagesCapacity);
-    Db *db = new Db(memtableNumOfElements, SearchType::B_TREE_SEARCH, bufferPool, lsmTree);
-    db->Open("./my_db_lsm_tree");
+    KVS *kvs = new KVS(memtableNumOfElements, SearchType::B_TREE_SEARCH, bufferPool, lsmTree);
+    kvs->Open("./my_kvs_lsm_tree");
 
     // Test Put
     // Write 512 pages of key-value pairs and one extra page
@@ -339,28 +339,28 @@ void runTestDbWithLSMTree() {
     uint64_t expectedValuesSum = 0;
     for (uint64_t i = 0; i <= 512; i++) {
         for (uint64_t t = i * 256; t < (i + 1) * 256; t++) {
-            db->Put(t, t * 10);
+            kvs->Put(t, t * 10);
             expectedValuesSum += t * 10;
         }
     }
 
-    runLSMTreeGet(db, expectedValuesSum);
-    runLSMTreeScan(db, expectedValuesSum);
+    runLSMTreeGet(kvs, expectedValuesSum);
+    runLSMTreeScan(kvs, expectedValuesSum);
 
-    db->Close();
+    kvs->Close();
 
-    db->Open("./my_db_lsm_tree");
+    kvs->Open("./my_kvs_lsm_tree");
     std::cout << "Try again!!!!!!!!!" << std::endl;
-    runLSMTreeGet(db, expectedValuesSum);
-    runLSMTreeScan(db, expectedValuesSum);
+    runLSMTreeGet(kvs, expectedValuesSum);
+    runLSMTreeScan(kvs, expectedValuesSum);
 
-    db->Close();
+    kvs->Close();
 }
 
 int main(int argc, char *argv[]) {
-    runTestOnDbWithBinarySearch();
-    runTestOnDbWithCompleteBTree();
-    runTestOnDbWithIncompleteBTree();
-    runTestDbWithLSMTree();
+    runTestOnKVSWithBinarySearch();
+    runTestOnKVSWithCompleteBTree();
+    runTestOnKVSWithIncompleteBTree();
+    runTestKVSWithLSMTree();
     return 0;
 }

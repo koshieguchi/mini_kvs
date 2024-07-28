@@ -22,9 +22,9 @@ Level::~Level() {
 
 int Level::GetLevelNumber() const { return this->level; }
 
-void Level::WriteDataToLevel(std::vector<DataEntry_t> data, SearchType searchType, std::string &dbPath) {
+void Level::WriteDataToLevel(std::vector<DataEntry_t> data, SearchType searchType, std::string &kvsPath) {
     std::string fileName = Utils::GetFilenameWithExt(std::to_string(this->sstFiles.size()));
-    std::string filePath = dbPath + "/" + Utils::LEVEL + std::to_string(this->level) + "-" + fileName;
+    std::string filePath = kvsPath + "/" + Utils::LEVEL + std::to_string(this->level) + "-" + fileName;
     uint64_t dataByteSize = data.size() * SST::KV_PAIR_BYTE_SIZE;
     auto *bloomFilter = new BloomFilter(this->bloomFilterBitsPerEntry, data.size());
     bloomFilter->InsertKeys(data);
@@ -52,7 +52,7 @@ void WriteRemainingData(int fd, int index, BloomFilter *bloomFilter, InputReader
     }
 }
 
-void Level::SortMergeAndWriteToNextLevel(Level *nextLevel, std::string &dbPath) {
+void Level::SortMergeAndWriteToNextLevel(Level *nextLevel, std::string &kvsPath) {
     uint64_t sstDataSize = 0;
     for (auto sstFile : this->sstFiles) {
         sstDataSize += sstFile->GetFileDataSize();
@@ -60,7 +60,7 @@ void Level::SortMergeAndWriteToNextLevel(Level *nextLevel, std::string &dbPath) 
 
     // Create and setup new SST file for sort-merged data
     std::string fileName = Utils::GetFilenameWithExt(std::to_string(nextLevel->sstFiles.size()));
-    std::string filePath = dbPath + "/" + Utils::LEVEL + std::to_string(nextLevel->level) + "-" + fileName;
+    std::string filePath = kvsPath + "/" + Utils::LEVEL + std::to_string(nextLevel->level) + "-" + fileName;
     int maxNumKeys = std::ceil(sstDataSize / SST::KV_PAIR_BYTE_SIZE);
     auto *bloomFilter = new BloomFilter(this->bloomFilterBitsPerEntry, maxNumKeys);
     SST *sortMergedFile = new SST(filePath, sstDataSize, bloomFilter);

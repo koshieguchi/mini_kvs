@@ -1,5 +1,5 @@
 
-#include "db.h"
+#include "kvs.h"
 
 #include <algorithm>
 #include <cmath>
@@ -10,7 +10,7 @@
 namespace fs = std::filesystem;
 
 /* Public definitions */
-Db::Db(int memtableSize, SearchType searchType, BufferPool *bufferPool, LSMTree *lsmTree) {
+KVS::KVS(int memtableSize, SearchType searchType, BufferPool *bufferPool, LSMTree *lsmTree) {
     this->memtable = new Memtable(memtableSize);
     this->allSSTs = {};
     this->bufferPool = bufferPool;
@@ -19,7 +19,7 @@ Db::Db(int memtableSize, SearchType searchType, BufferPool *bufferPool, LSMTree 
     this->lsmTree = lsmTree;
 }
 
-Db::~Db() {
+KVS::~KVS() {
     delete this->memtable;
     delete this->bufferPool;
     delete this->lsmTree;
@@ -29,10 +29,10 @@ Db::~Db() {
     this->allSSTs.clear();
 }
 
-bool Db::Open(const std::string &path) {
-    this->dbPath = path;
-    if (!fs::exists(this->dbPath)) {
-        bool createDirRes = fs::create_directories(this->dbPath);
+bool KVS::Open(const std::string &path) {
+    this->kvsPath = path;
+    if (!fs::exists(this->kvsPath)) {
+        bool createDirRes = fs::create_directories(this->kvsPath);
         if (!createDirRes) {
             return false;
         }
@@ -41,10 +41,10 @@ bool Db::Open(const std::string &path) {
     }
 
     std::multimap<std::string, SST *> levelsMap;
-    for (const auto &entry : fs::directory_iterator(this->dbPath)) {
+    for (const auto &entry : fs::directory_iterator(this->kvsPath)) {
         if (fs::is_regular_file(entry) && entry.path().extension() == Utils::SST_FILE_EXTENSION) {
             std::string fileNameStem = entry.path().stem().string();
-            std::string filePath = Utils::EnsureDirSlash(this->dbPath) + Utils::GetFilenameWithExt(fileNameStem);
+            std::string filePath = Utils::EnsureDirSlash(this->kvsPath) + Utils::GetFilenameWithExt(fileNameStem);
             if (!this->isLSMTree) {
                 SST *sstFile = new SST(filePath, fs::file_size(entry));
                 this->allSSTs.push_back(sstFile);
@@ -54,14 +54,14 @@ bool Db::Open(const std::string &path) {
     return true;
 }
 
-void Db::Close() {
+void KVS::Close() {
     auto data = this->memtable->GetAllData();
     if (!data.empty()) {
         if (this->isLSMTree) {
-            return this->lsmTree->WriteMemtableData(data, this->searchType, this->dbPath);
+            return this->lsmTree->WriteMemtableData(data, this->searchType, this->kvsPath);
         }
         std::string fileName = Utils::GetFilenameWithExt(std::to_string(this->allSSTs.size()));
-        std::string filePath = Utils::EnsureDirSlash(this->dbPath) + fileName;
+        std::string filePath = Utils::EnsureDirSlash(this->kvsPath) + fileName;
         SST *sstFile = new SST(filePath, data.size() * SST::KV_PAIR_BYTE_SIZE);
         if (this->searchType == SearchType::B_TREE_SEARCH) {
             sstFile->SetupBTreeFile();
@@ -78,7 +78,7 @@ void Db::Close() {
     this->allSSTs.clear();
 }
 
-void Db::Put(uint64_t key, uint64_t value) {
+void KVS::Put(uint64_t key, uint64_t value) {
     // Insert this new node into the binary search tree
     if (this->memtable->Put(key, value)) {
         return;
@@ -86,9 +86,9 @@ void Db::Put(uint64_t key, uint64_t value) {
 
     auto data = this->memtable->GetAllData();
     if (this->isLSMTree) {
-        this->lsmTree->WriteMemtableData(data, this->searchType, this->dbPath);
+        this->lsmTree->WriteMemtableData(data, this->searchType, this->kvsPath);
     } else {
-        auto fileName = this->dbPath + "/" + Utils::GetFilenameWithExt(std::to_string(this->allSSTs.size()));
+        auto fileName = this->kvsPath + "/" + Utils::GetFilenameWithExt(std::to_string(this->allSSTs.size()));
         int sstFileDataSize = data.size() * SST::KV_PAIR_BYTE_SIZE;
         SST *sstFile = new SST(fileName, sstFileDataSize);
         if (this->searchType == SearchType::B_TREE_SEARCH) {
@@ -103,7 +103,7 @@ void Db::Put(uint64_t key, uint64_t value) {
     this->memtable->Put(key, value);
 }
 
-uint64_t Db::Get(uint64_t key) {
+uint64_t KVS::Get(uint64_t key) {
     auto value = this->memtable->Get(key);
     if (value != Utils::INVALID_VALUE) {
         return value;
@@ -127,23 +127,23 @@ uint64_t Db::Get(uint64_t key) {
     return value;
 }
 
-void Db::Update(uint64_t key, uint64_t newValue) {
+void KVS::Update(uint64_t key, uint64_t newValue) {
     if (this->isLSMTree) {
-        Db::Put(key, newValue);
+        KVS::Put(key, newValue);
     } else {
-        std::cerr << "Update is not supported in a non-LSMTree db." << std::endl;
+        std::cerr << "Update is not supported in a non-LSMTree kvs." << std::endl;
     }
 }
 
-void Db::Delete(uint64_t key) {
+void KVS::Delete(uint64_t key) {
     if (this->isLSMTree) {
-        Db::Put(key, Utils::DELETED_KEY_VALUE);
+        KVS::Put(key, Utils::DELETED_KEY_VALUE);
     } else {
-        std::cerr << "Delete is not supported in a non-LSMTree db." << std::endl;
+        std::cerr << "Delete is not supported in a non-LSMTree kvs." << std::endl;
     }
 }
 
-void Db::Scan(uint64_t key1, uint64_t key2, std::vector<DataEntry_t> &scanResult) {
+void KVS::Scan(uint64_t key1, uint64_t key2, std::vector<DataEntry_t> &scanResult) {
     scanResult = this->memtable->Scan(key1, key2);
     if (this->isLSMTree) {
         return this->lsmTree->Scan(key1, key2, scanResult);
@@ -163,7 +163,7 @@ void Db::Scan(uint64_t key1, uint64_t key2, std::vector<DataEntry_t> &scanResult
 }
 
 // Used in experiments.
-void Db::ResetBufferPool(int bufferPoolMinSize, int bufferPoolMaxSize, EvictionPolicyType evictionPolicyType) {
+void KVS::ResetBufferPool(int bufferPoolMinSize, int bufferPoolMaxSize, EvictionPolicyType evictionPolicyType) {
     delete this->bufferPool;
     this->bufferPool = new BufferPool(bufferPoolMinSize, bufferPoolMaxSize, evictionPolicyType);
 }

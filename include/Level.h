@@ -44,18 +44,18 @@ class Level {
      * Write KV-pair data into current LSM-Tree level.
      *
      * @param data the KV-pair data.
-     * @param searchType the search type used by DB (binary search or B-Tree search)
-     * @param dbPath the path to the DB file storage.
+     * @param searchType the search type used by KVS (binary search or B-Tree search)
+     * @param kvsPath the path to the KVS file storage.
      */
-    void WriteDataToLevel(std::vector<DataEntry_t> data, SearchType searchType, std::string &dbPath);
+    void WriteDataToLevel(std::vector<DataEntry_t> data, SearchType searchType, std::string &kvsPath);
 
     /**
      * Merge sort with the SST file at current level
      *
      * @param nextLevel the level in which sort-merged data will be written into
-     * @param dbPath the path to the DB file storage.
+     * @param kvsPath the path to the KVS file storage.
      */
-    void SortMergeAndWriteToNextLevel(Level *nextLevel, std::string &dbPath);
+    void SortMergeAndWriteToNextLevel(Level *nextLevel, std::string &kvsPath);
 
     /**
      * Get all the SST file objects within current LSM-Tree level.

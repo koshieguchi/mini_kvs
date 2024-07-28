@@ -19,7 +19,7 @@ LSMTree::~LSMTree() {
     }
 }
 
-void LSMTree::MaintainLevelCapacityAndCompact(Level *currLevel, std::string &dbPath) {
+void LSMTree::MaintainLevelCapacityAndCompact(Level *currLevel, std::string &kvsPath) {
     int level = currLevel->GetLevelNumber();
     if (this->levels[level]->GetSSTFiles().size() <= 1) {
         return;
@@ -31,18 +31,18 @@ void LSMTree::MaintainLevelCapacityAndCompact(Level *currLevel, std::string &dbP
     }
 
     Level *nextLevel = this->levels[level + 1];
-    currLevel->SortMergeAndWriteToNextLevel(nextLevel, dbPath);
-    LSMTree::MaintainLevelCapacityAndCompact(nextLevel, dbPath);
+    currLevel->SortMergeAndWriteToNextLevel(nextLevel, kvsPath);
+    LSMTree::MaintainLevelCapacityAndCompact(nextLevel, kvsPath);
 }
 
-void LSMTree::WriteMemtableData(std::vector<DataEntry_t> &data, SearchType searchType, std::string &dbPath) {
+void LSMTree::WriteMemtableData(std::vector<DataEntry_t> &data, SearchType searchType, std::string &kvsPath) {
     // Always write the new sst files to the first level
     if (this->levels.empty()) {
         auto *firstLevel = new Level(0, this->bitPerEntry, this->inputBufferCapacity, this->outputBufferCapacity);
         this->levels.push_back(firstLevel);
     }
-    this->levels[0]->WriteDataToLevel(data, searchType, dbPath);
-    LSMTree::MaintainLevelCapacityAndCompact(this->levels[0], dbPath);
+    this->levels[0]->WriteDataToLevel(data, searchType, kvsPath);
+    LSMTree::MaintainLevelCapacityAndCompact(this->levels[0], kvsPath);
 }
 
 std::vector<Level *> LSMTree::GetLevels() { return this->levels; }

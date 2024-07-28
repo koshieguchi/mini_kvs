@@ -9,7 +9,7 @@ This KV-Store is based on LSM-Tree.
 
 ```sh
 git clone
-cd final_db_project
+cd /path/to/mini-kvs
 bazel build //...
 
 # ref: Output Directory Layout, https://bazel.build/remote/output-directories

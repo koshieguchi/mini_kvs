@@ -2,8 +2,8 @@
 
 #include "test_bloom_filter.cpp"
 #include "test_clock.cpp"
-#include "test_db.cpp"
 #include "test_extendible_hashtable.cpp"
+#include "test_kvs.cpp"
 #include "test_lru.cpp"
 #include "test_lsm_tree.cpp"
 #include "test_memtable.cpp"
@@ -16,7 +16,7 @@ int main() {
         std::make_pair(new TestSST(), "TestSST"),                                  // SST Tests
         std::make_pair(new TestUtils(), "TestUtils"),                              // Utils Tests
         std::make_pair(new TestMemtable(), "TestMemtable"),                        // Memtable Tests
-        std::make_pair(new TestDb(), "TestDb"),                                    // Db Tests
+        std::make_pair(new TestKVS(), "TestKVS"),                                  // KVS Tests
         std::make_pair(new TestExtendibleHashtable(), "TestExtendibleHashtable"),  // ExtendibleHashtable Tests
         std::make_pair(new TestLRU(), "TestLRU"),                                  // LRU Tests
         std::make_pair(new TestClock(), "TestClock"),                              // Clock Tests

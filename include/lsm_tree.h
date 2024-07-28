@@ -36,18 +36,18 @@ class LSMTree {
      * Compact and push data into the next level if <currLevel> is full, otherwise do nothing.
      *
      * @param currLevel the current LSM-Tree level.
-     * @param dbPath the path to the DB file storage.
+     * @param kvsPath the path to the KVS file storage.
      */
-    void MaintainLevelCapacityAndCompact(Level *currLevel, std::string &dbPath);
+    void MaintainLevelCapacityAndCompact(Level *currLevel, std::string &kvsPath);
 
     /**
      * Write data in memtable into next level.
      *
      * @param data the data to write to file.
      * @param searchType the search type of the file (Binary search or B-Tree search).
-     * @param dbPath the path to the DB file storage.
+     * @param kvsPath the path to the KVS file storage.
      */
-    void WriteMemtableData(std::vector<DataEntry_t> &data, SearchType searchType, std::string &dbPath);
+    void WriteMemtableData(std::vector<DataEntry_t> &data, SearchType searchType, std::string &kvsPath);
 
     /**
      * Searches for value with given key in the LSM-Tree.
