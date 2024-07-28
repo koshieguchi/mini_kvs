@@ -4,8 +4,8 @@
 #include <cstdint>
 #include <iostream>
 
+#include "test_utils.hpp"
 #include "utils.hpp"
-#include "utils/test_utils.hpp"
 #include "xxhash.h"
 
 /*

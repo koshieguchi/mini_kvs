@@ -1,6 +1,6 @@
 cc_binary(
-  name="step3_exp",
-  srcs=["step3_exp.cpp", "exp_constants.hpp"],
+  name="exp",
+  srcs=["exp.cpp", "constants.hpp"],
   includes=["../include"],
   copts = ["-std=c++17"],
   deps=[

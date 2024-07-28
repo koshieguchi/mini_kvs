@@ -5,8 +5,8 @@
 #include <iostream>
 
 #include "kv_store.hpp"
+#include "test_utils.hpp"
 #include "utils.hpp"
-#include "utils/test_utils.hpp"
 
 void test_get_and_put() {
     KVStore kvstore(21, 2, 4);

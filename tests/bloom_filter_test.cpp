@@ -4,7 +4,7 @@
 #include <iostream>
 #include <string>
 
-#include "utils/test_utils.hpp"
+#include "test_utils.hpp"
 #include "xxhash.h"
 
 void test_bloom_filter() {
