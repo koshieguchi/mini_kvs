@@ -37,8 +37,8 @@
 
 # Unneccessary test directories
 tests/test_db*
-exps/results/*.csv
-exps/experiment_db*
+experiments/results/*.csv
+experiments/experiment_db*
 bin/
 
 # Bazel specific

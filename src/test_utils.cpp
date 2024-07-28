@@ -1,4 +1,4 @@
-#include <avl_tree.hpp>
+#include "avl_tree.hpp"
 
 bool are_identical_trees(Node *node1, Node *node2) {
     if (node1 == nullptr && node2 == nullptr) {

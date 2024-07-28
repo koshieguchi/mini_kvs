@@ -41,7 +41,7 @@ bazel run //...
 bazel run //...   --output_filter='' --verbose_failures --subcommands
 ```
 
-This will generate the experiment results in CSV format in the `exps` directory.
+This will generate the experiment results in CSV format in the `experiments` directory.
 
 ### Debug
 
