@@ -6,10 +6,10 @@
 #include <string>
 #include <vector>
 
-#include "SST.h"
 #include "buffer_pool.h"
 #include "lsm_tree.h"
 #include "memtable.h"
+#include "sst.h"
 
 /**
  * Class representing the key-value database.
