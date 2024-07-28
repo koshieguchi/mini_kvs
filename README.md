@@ -58,22 +58,18 @@ Follow the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide
 
 ## Bazel commands
 
+- [Build programs with Bazel](https://bazel.build/run/build)
+- [Commands and Options  |  Bazel](https://bazel.build/docs/user-manual)
+
 ```sh
 bazel build //...
 bazel build //... --sandbox_debug --verbose_failures
 bazel test //...
 bazel run //...
-bazel clean --expunge
-```
 
-debug
-
-```sh
-bazel query --output=build //external:cc_toolchain # current compiler
-bazel info release
-bazel info workspace # root directory
-bazel info output_base # base directory of build output
-bazel info execution_root # directory for execution directory
+# ref: Output Directory Layout, https://bazel.build/remote/output-directories
+bazel clean
+bazel clean --expunge # -expunge option will clean the entire outputBase.
 ```
 
 test
@@ -84,5 +80,28 @@ bazel test //tests/... # execute all tests
 bazel test //path/to/tests:all --test_output=summary # default
 bazel test //tests/... --test_output=errors # only show errors
 bazel test //tests/... --test_output=all
-
 ```
+
+debug
+
+```sh
+bazel query --output=build //external:cc_toolchain # current compiler
+bazel info release
+bazel info workspace # root directory
+bazel info output_base # base directory of build output
+bazel info execution_root # directory for execution directory
+
+echo -n $(pwd) | md5sum
+# check the hash value of the current directory for output directory
+# ex) b8f5b01e148b1e668d68d5e6cc8c2765
+
+bazel build //... --build_event_text_file=events.txt # you can see the build events
+bazel dump --rules
+```
+
+## References
+
+- [C++ and Bazel](https://bazel.build/docs/bazel-and-cpp)
+  - Best practices for building C++ projects with Bazel
+- [Best Practices  |  Bazel](https://bazel.build/configure/best-practices)
+  - General best practices for using Bazel
