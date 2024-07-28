@@ -9,31 +9,31 @@
 #include "./lru.hpp"
 
 class BufferPool {
- private:
-  ExtendibleHashtable *hashtable;
-  LRU *eviction_policy;
+   private:
+    ExtendibleHashtable *hashtable;
+    LRU *eviction_policy;
 
-  void evict();
+    void evict();
 
- public:
-  BufferPool(int min_size, int max_size);
+   public:
+    BufferPool(int min_size, int max_size);
 
-  ~BufferPool();
+    ~BufferPool();
 
-  // Retrieve the page data associated with a given page ID.
-  const char *get(const std::string &page_id);
+    // Retrieve the page data associated with a given page ID.
+    const char *get(const std::string &page_id);
 
-  // Resize the buffer pool to a new maximum size.
-  // Evicts pages if the new size is smaller than the current number of pages.
-  void resize(int new_max_size);
+    // Resize the buffer pool to a new maximum size.
+    // Evicts pages if the new size is smaller than the current number of pages.
+    void resize(int new_max_size);
 
-  // Insert a new page into the buffer pool.
-  void insert(const std::string &page_id, const char *data);
+    // Insert a new page into the buffer pool.
+    void insert(const std::string &page_id, const char *data);
 
-  //Remove a page from the buffer pool
-  void remove(const std::string &page_id);
+    // Remove a page from the buffer pool
+    void remove(const std::string &page_id);
 
-  std::vector<Page *> get_all_pages();
+    std::vector<Page *> get_all_pages();
 };
 
 #endif  // BUFFER_POOL_HPP_

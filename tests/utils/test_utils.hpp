@@ -9,4 +9,4 @@ constexpr const char *RESET = "\033[0m";
 bool are_identical_avl_trees(AVLTree *tree1, AVLTree *tree2);
 bool are_identical_trees(Node *node1, Node *node2);
 
-#endif // TEST_UTILS_H
+#endif  // TEST_UTILS_H
