@@ -1,6 +1,6 @@
 # Mini KVS
 
-## Directory Structure
+<!-- ## Directory Structure
 
 ```
 ├── Makefile    - Contains scripts for automating the build process.
@@ -15,7 +15,7 @@
 ├── obj         - Directory for object files.
 ├── src         - Directory for source code.
 └── tests       - Directory for test code.
-```
+``` -->
 
 ## How to Use
 

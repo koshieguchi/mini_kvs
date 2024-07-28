@@ -33,6 +33,7 @@
 
 # Meta directories
 .vscode/*
+.DS_Store
 
 # Unneccessary test directories
 tests/test_db*
