@@ -60,7 +60,27 @@ Follow the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide
 
 ```sh
 bazel build //...
+bazel build //... --sandbox_debug --verbose_failures
 bazel test //...
 bazel run //...
 bazel clean --expunge
 ```
+
+```sh
+bazel query --output=build //external:cc_toolchain # current compiler
+bazel info release # Bazelのリリースバージョン
+bazel info workspace # ワークスペースのルートディレクトリ
+bazel info output_base # ビルド出力のベースディレクトリ
+bazel info execution_root # 実行ルートディレクトリ
+
+```
+
+- `/private/var/tmp/_bazel_<user>`: bazel の sandbox ディレクトリ
+
+## Bzel の疑問
+
+- private ディレクトリはどのような条件で作成されるのか
+- private ディレクトリと bazel-bin などの違いは何か
+- sandbox モードにするとどこにディレクトリが作成されるのか
+- MODULE.bazel とは何か
+- bazel における hermetic の意味は何か

@@ -1,3 +1,5 @@
+# CC = /Library/Developer/CommandLineTools/usr/bin/c++
+# CC = /Library/Developer/CommandLineTools/usr/bin/clang++
 CC = g++
 C_COMPILER = gcc
 INCLUDE_DIRS = -Iinclude -Iexternal/xxHash
