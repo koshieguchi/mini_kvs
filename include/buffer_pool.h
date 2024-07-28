@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <string>
 
-#include "EvictionPolicy.h"
+#include "eviction_policy.h"
 #include "extendible_hashtable.h"
 
 /**

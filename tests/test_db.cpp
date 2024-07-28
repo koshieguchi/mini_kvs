@@ -2,8 +2,8 @@
 #include <cmath>
 #include <filesystem>
 
-#include "TestBase.h"
 #include "db.h"
+#include "test_base.h"
 
 int bufferPoolMinSize = pow(2, 2);
 int bufferPoolMaxSize = pow(2, 3);

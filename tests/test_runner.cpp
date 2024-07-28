@@ -1,14 +1,14 @@
 #include <iostream>
 
-#include "TestBloomFilter.cpp"
-#include "TestClock.cpp"
-#include "TestDb.cpp"
-#include "TestExtendibleHashtable.cpp"
-#include "TestLRU.cpp"
-#include "TestLSMTree.cpp"
-#include "TestMemtable.cpp"
-#include "TestSST.cpp"
-#include "TestUtils.cpp"
+#include "test_bloom_filter.cpp"
+#include "test_clock.cpp"
+#include "test_db.cpp"
+#include "test_extendible_hashtable.cpp"
+#include "test_lru.cpp"
+#include "test_lsm_tree.cpp"
+#include "test_memtable.cpp"
+#include "test_sst.cpp"
+#include "test_utils.cpp"
 
 int main() {
     bool allTestPassed = true;

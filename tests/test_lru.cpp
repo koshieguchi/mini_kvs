@@ -1,6 +1,6 @@
 
-#include "TestBase.h"
 #include "lru.h"
+#include "test_base.h"
 
 class TestLRU : public TestBase {
     static bool TestInsert() {

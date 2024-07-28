@@ -9,10 +9,10 @@
 #include <string>
 #include <vector>
 
-#include "BTreeLevel.h"
-#include "BloomFilter.h"
-#include "BufferPool.h"
-#include "Utils.h"
+#include "btree_level.h"
+#include "bloom_filter.h"
+#include "utils.h"
+#include "buffer_pool.h"
 
 class InputReader;
 

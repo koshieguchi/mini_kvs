@@ -4,7 +4,7 @@
 #include <list>
 #include <vector>
 
-#include "EvictionPolicy.h"
+#include "eviction_policy.h"
 #include "page.h"
 
 /**

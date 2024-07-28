@@ -3,8 +3,8 @@
 
 #include <vector>
 
-#include "EvictionPolicy.h"
-#include "EvictionQueueNode.h"
+#include "eviction_policy.h"
+#include "eviction_queue_node.h"
 
 /**
  * Class representing LRU eviction policy for buffer pool.

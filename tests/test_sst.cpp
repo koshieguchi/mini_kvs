@@ -1,8 +1,8 @@
 #include <iostream>
 #include <string>
 
-#include "TestBase.h"
 #include "sst.h"
+#include "test_base.h"
 
 class TestSST : public TestBase {
     static bool TestWriteFile() {

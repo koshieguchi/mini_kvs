@@ -1,7 +1,7 @@
 #include <algorithm>
 
-#include "TestBase.h"
 #include "memtable.h"
+#include "test_base.h"
 
 class TestMemtable : public TestBase {
     static bool TestGetMaxSize() {

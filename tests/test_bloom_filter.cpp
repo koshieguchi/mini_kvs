@@ -3,8 +3,8 @@
 #include <set>
 #include <vector>
 
-#include "TestBase.h"
 #include "bloom_filter.h"
+#include "test_base.h"
 
 class TestBloomFilter : public TestBase {
     static const int bitsPerEntry = 10;

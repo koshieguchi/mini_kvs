@@ -1,10 +1,9 @@
 
-#include "TestBase.h"
-#include "../include/ExtendibleHashtable.h"
+#include "../include/extendible_hashtable.h"
+#include "test_base.h"
 
 class TestExtendibleHashtable : public TestBase {
-
-public:
+   public:
     static bool TestConstructor() {
         bool result = true;
         auto hashtable = new ExtendibleHashtable(2, 8);

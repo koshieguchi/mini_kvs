@@ -2,8 +2,8 @@
 #include <string>
 #include <vector>
 
-#include "TestBase.h"
-#include "lsmtree.h"
+#include "lsm_tree.h"
+#include "test_base.h"
 
 namespace fs = std::filesystem;
 

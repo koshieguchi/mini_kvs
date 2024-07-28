@@ -6,9 +6,9 @@
 #include <string>
 #include <vector>
 
-#include "BufferPool.h"
 #include "SST.h"
-#include "lsmtree.h"
+#include "buffer_pool.h"
+#include "lsm_tree.h"
 #include "memtable.h"
 
 /**
