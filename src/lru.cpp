@@ -1,72 +1,73 @@
-#include "lru.hpp"
+#include "LRU.h"
 
-#include <string>
-
-void LRU::insert(std::string key) {
-    LRUNode* node = new LRUNode(key);
-
-    if (front != nullptr) {
-        front->prev = node;
-        node->next = front;
-    }
-    front = node;
-
-    if (rear == nullptr) {
-        rear = node;
-    }
-
-    node_map[key] = node;
+LRU::LRU() {
+    this->evictionQueueHead = nullptr;
+    this->mostRecent = nullptr;
 }
 
-void LRU::remove(std::string key) {
-    if (node_map.find(key) == node_map.end()) {
-        // not found
-    } else {
-        LRUNode* node = node_map[key];
-        if (node->prev == nullptr) {
-            // this node is at the front
-            front = node->next;
-        } else {
-            node->prev->next = node->next;
-        }
-        if (node->next == nullptr) {
-            // this node is at the rear
-            rear = node->prev;
-        } else {
-            node->next->prev = node->prev;
-        }
-        node_map.erase(key);
+void LRU::Insert(Page *page) {
+    auto *newNode = new EvictionQueueNode(page, nullptr, nullptr);
+    page->SetEvictionQueueNode(newNode);
+
+    if (this->evictionQueueHead == nullptr) {
+        this->evictionQueueHead = newNode;
+        this->mostRecent = newNode;
+        return;
     }
+
+    this->mostRecent->SetNext(newNode);
+    newNode->SetPrev(this->mostRecent);
+    this->mostRecent = newNode;
 }
 
-void LRU::update(std::string key) {
-    LRUNode* node = node_map[key];
-    if (node != front) {
-        if (node->prev != nullptr) {
-            if (node == rear) {
-                rear = node->prev;
-            }
-            node->prev->next = node->next;
-        }
-        if (node->next != nullptr) {
-            node->next->prev = node->prev;
-        }
-        front->prev = node;
-        node->next = front;
-        front = node;
+// Update the newly accessed page to be the most recently used page.
+void LRU::UpdatePageAccessStatus(Page *accessedPage) {
+    EvictionQueueNode *accessedNode = accessedPage->GetEvictionQueueNode();
+
+    // No need to do anything the page being accessed is already the most recent
+    if (accessedNode == this->mostRecent) {
+        return;
     }
+
+    // Link prev node to next node:  prev <-> accessedPage <-> next  =>  prev <-> next
+    EvictionQueueNode *prev = accessedNode->GetPrev();
+    EvictionQueueNode *next = accessedNode->GetNext();
+    if (prev != nullptr) {
+        prev->SetNext(next);
+    }
+    if (next != nullptr) {
+        next->SetPrev(prev);
+    }
+
+    if (accessedNode == this->evictionQueueHead) {
+        this->evictionQueueHead = next;
+    }
+
+    // Put this newly accessed page after the mostRecent
+    if (this->mostRecent != nullptr) {
+        this->mostRecent->SetNext(accessedNode);
+    }
+    accessedNode->SetPrev(this->mostRecent);
+    accessedNode->SetNext(nullptr);
+    this->mostRecent = accessedNode;
 }
 
-std::string LRU::evict() {
-    LRUNode* node = rear;
-    if (rear->prev == nullptr) {
-        // then the linked list only has one node
-        rear = nullptr;
-        front = nullptr;
-    } else {
-        rear->prev->next = nullptr;
-        rear = rear->prev;
+// Evict the least recently used page
+Page *LRU::GetPageToEvict() {
+    EvictionQueueNode *targetEvictionNode = this->evictionQueueHead;
+
+    // Delete the EvictionQueueNode of this page, which is the first node of the queue.
+    EvictionQueueNode *next = targetEvictionNode->GetNext();
+    if (next != nullptr) {
+        next->SetPrev(nullptr);
     }
-    node_map.erase(node->key);
-    return node->key;
+    this->evictionQueueHead = next;
+
+    Page *pageToEvict = targetEvictionNode->GetPage();
+    pageToEvict->SetEvictionQueueNode(nullptr);
+    return pageToEvict;
+}
+
+EvictionQueueNode *LRU::GetQueueHead() {
+    return this->evictionQueueHead;
 }
