@@ -1,14 +1,16 @@
-#ifndef KV_STORE_H
-#define KV_STORE_H
+#ifndef KV_STORE_HPP_
+#define KV_STORE_HPP_
 
 #include <cstdint>
 #include <filesystem>
 #include <fstream>
 #include <vector>
+#include <string>
+#include <utility>
 
-#include "avl_tree.hpp"
-#include "buffer_pool.hpp"
-#include "level.hpp"
+#include "./avl_tree.hpp"
+#include "./buffer_pool.hpp"
+#include "./level.hpp"
 
 namespace fs = std::filesystem;
 
@@ -45,4 +47,4 @@ class KVStore {
   void write_memtable_to_sst();
 };
 
-#endif  // KV_STORE_H
+#endif  // KV_STORE_HPP_

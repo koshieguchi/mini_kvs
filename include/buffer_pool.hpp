@@ -1,11 +1,12 @@
-#ifndef BUFFER_POOL_H
-#define BUFFER_POOL_H
+#ifndef BUFFER_POOL_HPP_
+#define BUFFER_POOL_HPP_
 
 #include <cstdint>
 #include <string>
+#include <vector>
 
-#include "extendible_hashtable.hpp"
-#include "lru.hpp"
+#include "./extendible_hashtable.hpp"
+#include "./lru.hpp"
 
 class BufferPool {
  private:
@@ -35,4 +36,4 @@ class BufferPool {
   std::vector<Page *> get_all_pages();
 };
 
-#endif  // BUFFER_POOL_H
+#endif  // BUFFER_POOL_HPP_

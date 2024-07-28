@@ -1,9 +1,11 @@
-#ifndef BUCKET_H
-#define BUCKET_H
+#ifndef BUCKET_HPP_
+#define BUCKET_HPP_
 
-#include "page.hpp"
 #include <cstdint>
 #include <forward_list>
+#include <string>
+
+#include "./page.hpp"
 
 class Bucket {
 private:
@@ -48,4 +50,4 @@ public:
   void clear();
 };
 
-#endif // BUCKET_H
+#endif // BUCKET_HPP_

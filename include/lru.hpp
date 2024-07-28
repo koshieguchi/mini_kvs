@@ -1,5 +1,5 @@
-#ifndef LRU_H
-#define LRU_H
+#ifndef LRU_HPP_
+#define LRU_HPP_
 
 #include <string>
 #include <unordered_map>
@@ -29,4 +29,4 @@ class LRU {
   std::string evict();  // Evict from linked list and return evicted key
 };
 
-#endif  // LRU_H
+#endif  // LRU_HPP_
