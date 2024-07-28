@@ -3,13 +3,16 @@
 
 #include <chrono>
 #include <cmath>
+#include <filesystem>
 #include <iostream>
+
+namespace fs = std::filesystem;
 
 namespace ExpConstants {
 using Clock = std::chrono::high_resolution_clock;
 using Microseconds = std::chrono::microseconds;
 
-const std::string EXP_DB_PATH = "exps/experiment_db_";
+const std::string EXP_DB_PATH = fs::current_path() / ("experiments/experiment_db_");
 const unsigned int TIME_CONVERSION_MICROSECONDS = 1000000;  // Conversion factor to microseconds
 const unsigned int ONE_MEGA_BYTE = 1048576;                 // 1024 * 1024, 1 MB
 const unsigned int ONE_GIGA_BYTE = 1073741824;              // 1024 * 1024 * 1024, 1 GB

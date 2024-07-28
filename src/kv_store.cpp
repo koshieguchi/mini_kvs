@@ -39,7 +39,7 @@ void KVStore::put(uint32_t key, uint32_t value) {
     memtable.put(key, value);
     current_memtable_entries++;
 
-    // [*] add the logic to flush memtable to SSTs here
+    // if memtable is full, write it to SST
     if (current_memtable_entries >= memtable_size) {
         write_memtable_to_sst();
     }
@@ -49,8 +49,8 @@ uint32_t KVStore::get(uint32_t key) {
     uint32_t value = memtable.get(key);
 
     if (value == Utils::TOMB_STONE) {
-        return Utils::INVALID_VALUE;  // Key does not exist since it has been
-                                      // deleted.
+        // Key does not exist since it has been deleted.
+        return Utils::INVALID_VALUE;
     } else if (value != Utils::INVALID_VALUE) {
         return value;
     }

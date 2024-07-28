@@ -4,6 +4,8 @@
 
 #include "utils.hpp"
 
+/* Implementation for AVLTree (Memtable) */
+
 int AVLTree::get_height(Node *node) {
     if (!node) {
         return 0;
@@ -95,8 +97,6 @@ Node *AVLTree::get_node(Node *node, uint32_t key) {
     }
     return nullptr;
 }
-
-/* Implementation for memtable */
 
 void AVLTree::put(uint32_t key, uint32_t value) { root = insert_node(root, key, value); }
 

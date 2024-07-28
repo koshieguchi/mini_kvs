@@ -113,10 +113,10 @@ int main() {
 
     // Perform benchmarks and write to files
 
-    Utils::clear_databases("exps", "experiment_db");
+    Utils::clear_databases("experiments", "experiment_db");
 
     // Experiment for put operations
-    std::ofstream put_file("exps/results/step3_put_results.csv");
+    std::ofstream put_file("experiments/results/step3_put_results.csv");
     put_file << "op_type,data_size(MB),throughput(op/s)" << std::endl;
     for (unsigned int i = ExpConstants::ONE_MEGA_BYTE; i <= ExpConstants::ONE_GIGA_BYTE; i *= 2) {
         benchmark_kvstore_put(memtable_size, i, put_file, true);
@@ -124,7 +124,7 @@ int main() {
     put_file.close();
 
     // Experiment for sequential get operations
-    std::ofstream get_sequential_file("exps/results/step3_sequential_get_results.csv");
+    std::ofstream get_sequential_file("experiments/results/step3_sequential_get_results.csv");
     get_sequential_file << "op_type,data_size(MB),throughput(op/s)" << std::endl;
     for (unsigned int i = ExpConstants::ONE_MEGA_BYTE; i <= ExpConstants::ONE_GIGA_BYTE; i *= 2) {
         benchmark_kvstore_sequential_get(memtable_size, i, get_sequential_file);
@@ -132,7 +132,7 @@ int main() {
     get_sequential_file.close();
 
     // Experiment for random get operations
-    std::ofstream get_random_file("exps/results/step3_random_get_results.csv");
+    std::ofstream get_random_file("experiments/results/step3_random_get_results.csv");
     get_random_file << "op_type,data_size(MB),throughput(op/s)" << std::endl;
     for (unsigned int i = ExpConstants::ONE_MEGA_BYTE; i <= ExpConstants::ONE_GIGA_BYTE; i *= 2) {
         benchmark_kvstore_random_get(memtable_size, i, get_random_file);
@@ -140,7 +140,7 @@ int main() {
     get_random_file.close();
 
     // Experiment for scan operations
-    std::ofstream scan_file("exps/results/step3_scan_results.csv");
+    std::ofstream scan_file("experiments/results/step3_scan_results.csv");
     scan_file << "op_type,data_size(MB),throughput(op/s)" << std::endl;
     for (unsigned int i = ExpConstants::ONE_MEGA_BYTE; i <= ExpConstants::ONE_GIGA_BYTE; i *= 2) {
         benchmark_kvstore_scan(memtable_size, i, scan_file);

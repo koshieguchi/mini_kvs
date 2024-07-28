@@ -15,8 +15,7 @@ BloomFilter::BloomFilter(int m, int num_entries) {
 }
 
 void BloomFilter::insert(uint32_t key) {
-    // we simulate different hash functions by choosing a different seed for each
-    // one
+    // we simulate different hash functions by choosing a different seed for each one
     for (int i = 0; i < this->hash_functions; i++) {
         this->bitmap[this->hash(key, i)] = 1;
     }
