@@ -66,21 +66,23 @@ bazel run //...
 bazel clean --expunge
 ```
 
+debug
+
 ```sh
 bazel query --output=build //external:cc_toolchain # current compiler
-bazel info release # Bazelのリリースバージョン
-bazel info workspace # ワークスペースのルートディレクトリ
-bazel info output_base # ビルド出力のベースディレクトリ
-bazel info execution_root # 実行ルートディレクトリ
-
+bazel info release
+bazel info workspace # root directory
+bazel info output_base # base directory of build output
+bazel info execution_root # directory for execution directory
 ```
 
-- `/private/var/tmp/_bazel_<user>`: bazel の sandbox ディレクトリ
+test
 
-## Bzel の疑問
+```sh
+bazel test //tests:avl_tree_test
+bazel test //tests/... # execute all tests
+bazel test //path/to/tests:all --test_output=summary # default
+bazel test //tests/... --test_output=errors # only show errors
+bazel test //tests/... --test_output=all
 
-- private ディレクトリはどのような条件で作成されるのか
-- private ディレクトリと bazel-bin などの違いは何か
-- sandbox モードにするとどこにディレクトリが作成されるのか
-- MODULE.bazel とは何か
-- bazel における hermetic の意味は何か
+```
