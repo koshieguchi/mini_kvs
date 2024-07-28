@@ -43,6 +43,3 @@ bin/
 
 # Bazel specific
 /bazel-*
-/bazel-bin
-/bazel-out
-/bazel-testlogs

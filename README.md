@@ -62,12 +62,13 @@ bazel dump --rules
 
 ## Naming Conventions
 
-- Use `CamelCase` for class names
-- Use `snake_case` for variable names
-
-## Code Style
-
 Follow the [Google C++ Style Guide](https://google.github.io/styleguide/cppguide.html).
+
+- file_name: `snake_case`
+- variable_name: `snake_case`
+- ClassName: `PascalCase`
+- FunctionName: `PascalCase`
+- ConstantName: k+`PascalCase`
 
 ## References
 
