@@ -9,3 +9,12 @@ cc_library(
     ],
     visibility = ["//visibility:public"],
 )
+
+cc_binary(
+    name = "kv_store",
+    srcs = ["main.cpp"],
+    deps = [
+        ":kv_store_lib",
+    ],
+    visibility = ["//visibility:public"],
+)
