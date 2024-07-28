@@ -1,13 +1,13 @@
-#ifndef BTREE_H
-#define BTREE_H
+#ifndef BTREE_HPP_
+#define BTREE_HPP_
 
 #include <fstream>
 #include <iostream>
 #include <vector>
 
-#include "avl_tree.hpp"
-#include "buffer_pool.hpp"
-#include "utils.hpp"
+#include "./avl_tree.hpp"
+#include "./buffer_pool.hpp"
+#include "./utils.hpp"
 
 class BTreeNode {
  public:
@@ -62,4 +62,4 @@ class BTreeNode {
                               BufferPool* buffer_pool);
 };
 
-#endif  // BTREE_H
+#endif  // BTREE_HPP_

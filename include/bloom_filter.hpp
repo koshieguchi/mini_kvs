@@ -1,8 +1,8 @@
-#ifndef BLOOM_FILTER_H
-#define BLOOM_FILTER_H
+#ifndef BLOOM_FILTER_HPP_
+#define BLOOM_FILTER_HPP_
 
-#include "btree.hpp"
-#include "utils.hpp"
+#include "./btree.hpp"
+#include "./utils.hpp"
 
 class BloomFilter {
  private:
@@ -26,4 +26,4 @@ class BloomFilter {
   bool get(uint32_t key);
 };
 
-#endif  // BLOOM_FILTER_H
+#endif  // BLOOM_FILTER_HPP_

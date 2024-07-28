@@ -1,5 +1,5 @@
-#ifndef PAGE_H
-#define PAGE_H
+#ifndef PAGE_HPP_
+#define PAGE_HPP_
 
 #include <cstdint>
 #include <filesystem>
@@ -33,4 +33,4 @@ class Page {
   }
 };
 
-#endif  // PAGE_H
+#endif  // PAGE_HPP_

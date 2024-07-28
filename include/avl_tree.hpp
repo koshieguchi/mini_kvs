@@ -1,5 +1,5 @@
-#ifndef AVL_TREE_H
-#define AVL_TREE_H
+#ifndef AVL_TREE_HPP_
+#define AVL_TREE_HPP_
 
 #include <cstdint>
 
@@ -34,4 +34,4 @@ public:
   void clear();
 };
 
-#endif // AVL_TREE_H
+#endif // AVL_TREE_HPP_

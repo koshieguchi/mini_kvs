@@ -1,10 +1,13 @@
-#ifndef EXTENDIBLE_HASHTABLE_H
-#define EXTENDIBLE_HASHTABLE_H
+#ifndef EXTENDIBLE_HASHTABLE_HPP_
+#define EXTENDIBLE_HASHTABLE_HPP_
 
-#include "bucket.hpp"
-#include "xxhash.h"
 #include <cstdint>
 #include <vector>
+#include <string>
+#include <map>
+
+#include "./bucket.hpp"
+#include "xxhash.h"
 
 class ExtendibleHashtable {
 private:
@@ -73,4 +76,4 @@ public:
   std::vector<Page *> get_all_pages();
 };
 
-#endif // EXTENDIBLE_HASHTABLE_H
+#endif // EXTENDIBLE_HASHTABLE_HPP_

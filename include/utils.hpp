@@ -1,10 +1,11 @@
-#ifndef UTILS_H
-#define UTILS_H
+#ifndef UTILS_HPP_
+#define UTILS_HPP_
 
 #include <bitset>
 #include <cstddef>
 #include <cstdint>
 #include <limits>
+#include <string>
 
 namespace Utils {;
   const uint32_t INVALID_VALUE = std::numeric_limits<uint32_t>::max(); // = -1
@@ -19,4 +20,4 @@ namespace Utils {;
 
 } // namespace Utils
 
-#endif // UTILS_H
+#endif // UTILS_HPP_
