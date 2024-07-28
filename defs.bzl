@@ -8,4 +8,5 @@ def create_cc_tests(test_names, name=None):
             deps = [
                 "//tests/utils:test_utils",
             ],
+            visibility = ["//visibility:private"],
         )
