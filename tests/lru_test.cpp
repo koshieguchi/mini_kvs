@@ -4,7 +4,7 @@
 #include <cstdint>
 #include <iostream>
 
-#include "utils/test_utils.hpp"
+#include "test_utils.hpp"
 
 void test_linked_list() {
     LRU lru;

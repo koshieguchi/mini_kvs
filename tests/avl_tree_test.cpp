@@ -2,7 +2,7 @@
 #include <cstdint>
 #include <iostream>
 
-#include "utils/test_utils.hpp"
+#include "test_utils.hpp"
 
 void test_equal() {
     AVLTree tree1;

@@ -4,7 +4,7 @@
 #include <iostream>
 
 #include "extendible_hashtable.hpp"
-#include "utils/test_utils.hpp"
+#include "test_utils.hpp"
 
 void test_initialization() {
     ExtendibleHashtable *hashtable = new ExtendibleHashtable(2, 4, 3);  // min_size, max_size, bucket_max_size

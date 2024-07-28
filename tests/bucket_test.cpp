@@ -6,7 +6,7 @@
 #include <cstdint>
 #include <iostream>
 
-#include "utils/test_utils.hpp"
+#include "test_utils.hpp"
 
 void test_get_page() {
     Bucket bucket(1);
