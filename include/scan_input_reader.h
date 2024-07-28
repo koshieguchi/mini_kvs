@@ -5,8 +5,8 @@
 #include <queue>
 #include <vector>
 
-#include "SST.h"
-#include "Utils.h"
+#include "sst.h"
+#include "utils.h"
 
 /**
  * Class representing a Input Reader Buffer for LSM-Tree Scan operation.

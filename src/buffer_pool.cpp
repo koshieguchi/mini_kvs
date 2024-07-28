@@ -1,9 +1,11 @@
 
-#include <utility>
+#include "buffer_pool.h"
+
 #include <cmath>
-#include "BufferPool.h"
-#include "LRU.h"
-#include "Clock.h"
+#include <utility>
+
+#include "clock.h"
+#include "lru.h"
 
 BufferPool::BufferPool(int minSize, int maxSize, EvictionPolicyType evictionPolicyType) {
     this->hashtable = new ExtendibleHashtable(minSize, maxSize);

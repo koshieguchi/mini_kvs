@@ -1,9 +1,8 @@
 
 #include "TestBase.h"
-#include "Clock.h"
+#include "clock.h"
 
 class TestClock : public TestBase {
-
     static bool TestInsert() {
         // Set up
         auto page = new Page("test", {1});
@@ -53,7 +52,7 @@ class TestClock : public TestBase {
         return result;
     }
 
-public:
+   public:
     bool RunTests() override {
         bool allTestPassed = true;
         allTestPassed &= assertTrue(TestInsert, "TestClock::TestInsert");

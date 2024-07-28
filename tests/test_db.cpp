@@ -1,15 +1,15 @@
-#include <filesystem>
 #include <algorithm>
 #include <cmath>
-#include "Db.h"
+#include <filesystem>
+
 #include "TestBase.h"
+#include "db.h"
 
 int bufferPoolMinSize = pow(2, 2);
 int bufferPoolMaxSize = pow(2, 3);
 EvictionPolicyType evictionPolicy = LRU_t;
 
 class TestDb : public TestBase {
-
     static bool TestOpen() {
         int memtableSize = 10;
         auto bufferPool = new BufferPool(bufferPoolMinSize, bufferPoolMaxSize, evictionPolicy);
@@ -68,7 +68,7 @@ class TestDb : public TestBase {
 
         db->Put(2, 3);
         result &= !std::filesystem::is_empty("./test_dir");  // db dir shouldn't be empty after second insert
-        result &= db->Get(2) == 3;  // Check if db access SST files correctly
+        result &= db->Get(2) == 3;                           // Check if db access SST files correctly
 
         // Clean up
         std::filesystem::remove_all("./test_dir");
@@ -106,7 +106,7 @@ class TestDb : public TestBase {
 
         uint64_t keysSum = 0;
         uint64_t valuesSum = 0;
-        for (std::pair<uint64_t, uint64_t> pair: nodesList) {
+        for (std::pair<uint64_t, uint64_t> pair : nodesList) {
             keysSum += pair.first;
             valuesSum += pair.second;
         }
@@ -141,7 +141,7 @@ class TestDb : public TestBase {
         return result;
     }
 
-public:
+   public:
     bool RunTests() override {
         bool result = true;
         result &= assertTrue(TestOpen, "TestDb::TestOpen");

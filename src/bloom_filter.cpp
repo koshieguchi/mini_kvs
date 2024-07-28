@@ -1,6 +1,7 @@
+#include "bloom_filter.h"
+
 #include <cmath>
 #include <string>
-#include "BloomFilter.h"
 
 BloomFilter::BloomFilter(int bitsPerEntry, int numKeys) {
     this->arrayBitSize = (bitsPerEntry * numKeys) + ((bitsPerEntry * numKeys) % Utils::EIGHT_BYTE_SIZE);
@@ -12,15 +13,13 @@ BloomFilter::BloomFilter(int bitsPerEntry, int numKeys) {
 
 uint64_t BloomFilter::GetIndexInBitArray(uint64_t key, uint64_t seed, uint64_t arrayBitSize) {
     std::string keyString = std::to_string(key);
-    void *const buffer = (void *const) keyString.c_str();
+    void *const buffer = (void *const)keyString.c_str();
     uint64_t hash = XXH64(buffer, keyString.size(), seed);
     uint64_t index = hash % arrayBitSize;
     return index;
 }
 
-int BloomFilter::GetIndexInFilterArray(uint64_t index) {
-    return std::ceil(index / Utils::EIGHT_BYTE_SIZE);
-}
+int BloomFilter::GetIndexInFilterArray(uint64_t index) { return std::ceil(index / Utils::EIGHT_BYTE_SIZE); }
 
 uint64_t BloomFilter::GetShiftedLocationInBitArray(uint64_t index) {
     return 1 << (Utils::EIGHT_BYTE_SIZE - (index % Utils::EIGHT_BYTE_SIZE) - 1);
@@ -41,7 +40,7 @@ void BloomFilter::InsertKey(uint64_t key) {
 }
 
 void BloomFilter::InsertKeys(std::vector<DataEntry_t> &data) {
-    for (auto pair: data) {
+    for (auto pair : data) {
         uint64_t key = pair.first;
         BloomFilter::InsertKey(key);
     }
@@ -62,18 +61,10 @@ bool BloomFilter::KeyProbablyExists(uint64_t key, std::vector<uint64_t> filterAr
     return true;
 }
 
-std::vector<uint64_t> BloomFilter::GetFilterArray() {
-    return this->array;
-}
+std::vector<uint64_t> BloomFilter::GetFilterArray() { return this->array; }
 
-uint64_t BloomFilter::GetFilterArraySize() const {
-    return this->arraySize;
-}
+uint64_t BloomFilter::GetFilterArraySize() const { return this->arraySize; }
 
-void BloomFilter::ClearFilterArray() {
-    this->array.clear();
-}
+void BloomFilter::ClearFilterArray() { this->array.clear(); }
 
-int BloomFilter::GetNumHashFunctions() const {
-    return this->numHashFunctions;
-}
+int BloomFilter::GetNumHashFunctions() const { return this->numHashFunctions; }

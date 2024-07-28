@@ -2,17 +2,18 @@
 #define LEVEL_H
 
 #include <string>
-#include "Utils.h"
-#include "SST.h"
-#include "InputReader.h"
-#include "ScanInputReader.h"
-#include "OutputWriter.h"
+
+#include "input_reader.h"
+#include "output_writer.h"
+#include "scan_input_reader.h"
+#include "sst.h"
+#include "utils.h"
 
 /**
  * Class representing a level in the LSM-Tree data structure.
  */
 class Level {
-private:
+   private:
     int level;
     int bloomFilterBitsPerEntry;
     std::vector<SST *> sstFiles;
@@ -23,7 +24,7 @@ private:
 
     void DeleteSSTFiles();
 
-public:
+   public:
     /**
      * Constructor for a Level object.
      *
@@ -62,4 +63,4 @@ public:
     std::vector<SST *> GetSSTFiles();
 };
 
-#endif // LEVEL_H
+#endif  // LEVEL_H

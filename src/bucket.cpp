@@ -1,5 +1,5 @@
 
-#include "Bucket.h"
+#include "bucket.h"
 
 Bucket::Bucket(int depth) {
     this->localDepth = depth;
@@ -32,25 +32,15 @@ void Bucket::Remove(Page *pageToRemove) {
     this->size--;
 }
 
-int Bucket::GetSize() const {
-    return this->size;
-}
+int Bucket::GetSize() const { return this->size; }
 
-int Bucket::GetLocalDepth() const {
-    return this->localDepth;
-}
+int Bucket::GetLocalDepth() const { return this->localDepth; }
 
-void Bucket::IncreaseLocalDepth() {
-    this->localDepth++;
-}
+void Bucket::IncreaseLocalDepth() { this->localDepth++; }
 
-void Bucket::DecreaseLocalDepth() {
-    this->localDepth--;
-}
+void Bucket::DecreaseLocalDepth() { this->localDepth--; }
 
-std::forward_list<Page *>Bucket::GetPages() {
-    return this->pages;
-}
+std::forward_list<Page *> Bucket::GetPages() { return this->pages; }
 
 void Bucket::Clear() {
     this->pages.clear();

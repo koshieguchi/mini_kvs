@@ -1,9 +1,10 @@
 
-#include <vector>
-#include <set>
 #include <iostream>
+#include <set>
+#include <vector>
+
 #include "TestBase.h"
-#include "BloomFilter.h"
+#include "bloom_filter.h"
 
 class TestBloomFilter : public TestBase {
     static const int bitsPerEntry = 10;
@@ -81,7 +82,7 @@ class TestBloomFilter : public TestBase {
         return result;
     }
 
-public:
+   public:
     bool RunTests() override {
         bool allTestPassed = true;
         allTestPassed &= assertTrue(TestGetIndexInBitArray, "TestBloomFilter::TestGetIndexInBitArray");

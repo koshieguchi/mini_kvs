@@ -1,10 +1,10 @@
-#include "Db.h"
 #include <iostream>
+
+#include "db.h"
 
 /* These are some examples of how a user should create and call the database. */
 
 void runTestOnDbWithBinarySearch() {
-
     // Memtable with size 512 pages
     int memtableNumOfElements = (512 * 4096) / 16;
     int minBufferPoolSize = 5;
@@ -42,8 +42,8 @@ void runTestOnDbWithBinarySearch() {
     if (valuesSumInGet == expectedValuesSum) {
         std::cout << "Tests Succeeded with binary search in get :))))!" << std::endl;
     } else {
-        std::cout << "Tests Failed in get! " << " expectedValuesSum: " << expectedValuesSum << " while valuesSumInGet: "
-                  << valuesSumInGet << std::endl;
+        std::cout << "Tests Failed in get! " << " expectedValuesSum: " << expectedValuesSum
+                  << " while valuesSumInGet: " << valuesSumInGet << std::endl;
     }
 
     std::vector<DataEntry_t> nodesList;
@@ -51,7 +51,7 @@ void runTestOnDbWithBinarySearch() {
     db->Scan(0, 131583 + 10, nodesList);
 
     uint64_t valuesSumInScan = 0;
-    for (DataEntry_t pair: nodesList) {
+    for (DataEntry_t pair : nodesList) {
         valuesSumInScan += pair.second;
     }
 
@@ -86,10 +86,10 @@ void runTestOnDbWithIncompleteBTree() {
     }
 
     uint64_t v1 = db->Get(256);
-    std::cout << "v1 is: " << v1 << " and " << (v1 == 2560) << std::endl; // expected == 2560
+    std::cout << "v1 is: " << v1 << " and " << (v1 == 2560) << std::endl;  // expected == 2560
 
     uint64_t v2 = db->Get(130559);
-    std::cout << "v2 is: " << v2 << " and " << (v2 == 1305590) << std::endl; // expected == 1305590
+    std::cout << "v2 is: " << v2 << " and " << (v2 == 1305590) << std::endl;  // expected == 1305590
 
     // Test Get on all
     uint64_t valuesSumInGet = 0;
@@ -102,8 +102,8 @@ void runTestOnDbWithIncompleteBTree() {
     if (valuesSumInGet == expectedValuesSum) {
         std::cout << "Tests Succeeded :))))!" << std::endl;
     } else {
-        std::cout << "Tests Failed! " << " expectedValuesSum: " << expectedValuesSum << " while valuesSumInGet: "
-                  << valuesSumInGet << std::endl;
+        std::cout << "Tests Failed! " << " expectedValuesSum: " << expectedValuesSum
+                  << " while valuesSumInGet: " << valuesSumInGet << std::endl;
     }
 
     // Test Scan
@@ -112,7 +112,7 @@ void runTestOnDbWithIncompleteBTree() {
     std::vector<DataEntry_t> nodesList;
     db->Scan(270, 512 * 256, nodesList);
     expectedKeysSum = expectedKeysSum - (269 * 270 / 2);
-    for (DataEntry_t pair: nodesList) {
+    for (DataEntry_t pair : nodesList) {
         keysSumInScan += pair.first;
         valuesSumInScan += pair.second;
     }
@@ -149,10 +149,10 @@ void runTestOnDbWithCompleteBTree() {
 
     // Test Get
     uint64_t v1 = db->Get(256);
-    std::cout << "v1 is: " << v1 << " " << (v1 == 2560) << std::endl; // expected == 2560
+    std::cout << "v1 is: " << v1 << " " << (v1 == 2560) << std::endl;  // expected == 2560
 
     uint64_t v2 = db->Get(2557);
-    std::cout << "v2 is: " << v2 << " " << (v2 == 25570) << std::endl; // expected == 25570
+    std::cout << "v2 is: " << v2 << " " << (v2 == 25570) << std::endl;  // expected == 25570
 
     // Test Get on all
     uint64_t valuesSumInGet = 0;
@@ -165,15 +165,15 @@ void runTestOnDbWithCompleteBTree() {
     if (valuesSumInGet == expectedValuesSum) {
         std::cout << "Tests Succeeded in Btree get :))))!" << std::endl;
     } else {
-        std::cout << "Tests Failed in get! " << " expectedValuesSum: " << expectedValuesSum << " while valuesSumInGet: "
-                  << valuesSumInGet << std::endl;
+        std::cout << "Tests Failed in get! " << " expectedValuesSum: " << expectedValuesSum
+                  << " while valuesSumInGet: " << valuesSumInGet << std::endl;
     }
 
     // Test Scan
     uint64_t valuesSumInScan = 0;
     std::vector<DataEntry_t> nodesList;
-    db->Scan(0, 131329, nodesList); // There are 513 pages of length 256. So we have from 0 to 131327.
-    for (DataEntry_t pair: nodesList) {
+    db->Scan(0, 131329, nodesList);  // There are 513 pages of length 256. So we have from 0 to 131327.
+    for (DataEntry_t pair : nodesList) {
         valuesSumInScan += pair.second;
     }
     if (valuesSumInScan == expectedValuesSum) {
@@ -205,15 +205,15 @@ void runTestOnDbWithBTreeMediumFile() {
     }
 
     uint64_t v1 = db->Get(256);
-    std::cout << "v1 is: " << v1 << std::endl; // == 2560
+    std::cout << "v1 is: " << v1 << std::endl;  // == 2560
 
     uint64_t v2 = db->Get(131072);
-    std::cout << "v2 is: " << v2 << std::endl; // == 1310720
+    std::cout << "v2 is: " << v2 << std::endl;  // == 1310720
 
     uint64_t valuesSum = 0;
     std::vector<DataEntry_t> nodesList;
     db->Scan(0, 512 * 256 * 256, nodesList);
-    for (DataEntry_t pair: nodesList) {
+    for (DataEntry_t pair : nodesList) {
         // std::cout << "(" << pair.first << "," << pair.second << ")" << std::endl;
         valuesSum += pair.second;
     }
@@ -221,8 +221,8 @@ void runTestOnDbWithBTreeMediumFile() {
     if (valuesSum == expectedValuesSum) {
         std::cout << "Tests Succeeded :))))!" << std::endl;
     } else {
-        std::cout << "Tests Failed! " << " expectedValuesSum: " << expectedValuesSum << " while valuesSum: "
-                  << valuesSum << std::endl;
+        std::cout << "Tests Failed! " << " expectedValuesSum: " << expectedValuesSum
+                  << " while valuesSum: " << valuesSum << std::endl;
     }
 }
 
@@ -246,11 +246,10 @@ void runTestOnDbWithBTreeBigFile() {
     }
 
     uint64_t v1 = db->Get(256);
-    std::cout << "v1 is: " << v1 << std::endl; // == 2560
+    std::cout << "v1 is: " << v1 << std::endl;  // == 2560
 
     uint64_t v2 = db->Get(131071 + 512);
-    std::cout << "v2 is: " << v2 << std::endl; // == 1315830
-
+    std::cout << "v2 is: " << v2 << std::endl;  // == 1315830
 
     // Test Get on all
     uint64_t valuesSumInGet = 0;
@@ -263,30 +262,30 @@ void runTestOnDbWithBTreeBigFile() {
     if (valuesSumInGet == expectedValuesSum) {
         std::cout << "Tests Succeeded in get :))))!" << std::endl;
     } else {
-        std::cout << "Tests Failed in get! " << " expectedValuesSum: " << expectedValuesSum << " while valuesSumInGet: "
-                  << valuesSumInGet << std::endl;
+        std::cout << "Tests Failed in get! " << " expectedValuesSum: " << expectedValuesSum
+                  << " while valuesSumInGet: " << valuesSumInGet << std::endl;
     }
 }
 
 void runLSMTreeGet(Db *db, uint64_t expectedValuesSum) {
     // Test Get
     uint64_t v1 = db->Get(256);
-    std::cout << "v1 is: " << v1 << " " << (v1 == 2560) << std::endl; // expected == 2560
+    std::cout << "v1 is: " << v1 << " " << (v1 == 2560) << std::endl;  // expected == 2560
 
     uint64_t v2 = db->Get(2557);
-    std::cout << "v2 is: " << v2 << " " << (v2 == 25570) << std::endl; // expected == 25570
+    std::cout << "v2 is: " << v2 << " " << (v2 == 25570) << std::endl;  // expected == 25570
 
     uint64_t v3 = db->Get(131325);
-    std::cout << "v3 is: " << v3 << " " << (v3 == 1313250) << std::endl; // expected == 1313250
+    std::cout << "v3 is: " << v3 << " " << (v3 == 1313250) << std::endl;  // expected == 1313250
 
     // Test keys that do not exist
     uint64_t v4 = db->Get(131330);
     std::cout << "v4 is: " << v4 << " " << (v4 == std::numeric_limits<uint64_t>::max()) << " NOT FOUND"
-              << std::endl; // expected == std::numeric_limits<uint64_t>::max()
+              << std::endl;  // expected == std::numeric_limits<uint64_t>::max()
 
     uint64_t v5 = db->Get(13133888888);
     std::cout << "v5 is: " << v5 << " " << (v5 == std::numeric_limits<uint64_t>::max()) << " NOT FOUND"
-              << std::endl; // expected == std::numeric_limits<uint64_t>::max()
+              << std::endl;  // expected == std::numeric_limits<uint64_t>::max()
 
     // Test Get on all
     uint64_t valuesSumInGet = 0;
@@ -300,8 +299,7 @@ void runLSMTreeGet(Db *db, uint64_t expectedValuesSum) {
         std::cout << "Tests Succeeded in LSM Tree get :))))!" << std::endl;
     } else {
         std::cout << "Tests Failed in LSM Tree get! " << " expectedValuesSum: " << expectedValuesSum
-                  << " while valuesSumInGet: "
-                  << valuesSumInGet << std::endl;
+                  << " while valuesSumInGet: " << valuesSumInGet << std::endl;
     }
 }
 
@@ -309,8 +307,8 @@ void runLSMTreeScan(Db *db, uint64_t expectedValuesSum) {
     // Test Scan
     uint64_t valuesSumInScan = 0;
     std::vector<DataEntry_t> nodesList;
-    db->Scan(0, 131329, nodesList); // There are 513 pages of length 256. So we have from 0 to 131327.
-    for (DataEntry_t pair: nodesList) {
+    db->Scan(0, 131329, nodesList);  // There are 513 pages of length 256. So we have from 0 to 131327.
+    for (DataEntry_t pair : nodesList) {
         valuesSumInScan += pair.second;
     }
     if (valuesSumInScan == expectedValuesSum) {

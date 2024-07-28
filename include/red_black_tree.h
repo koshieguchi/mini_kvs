@@ -1,17 +1,18 @@
 #ifndef REDBLACKTREE_H
 #define REDBLACKTREE_H
 
-#include "Node.h"
-#include "Utils.h"
+#include <limits>
 #include <utility>
 #include <vector>
-#include <limits>
+
+#include "Node.h"
+#include "utils.h"
 
 /**
  * Class representing a Red-Black Tree data structure.
  */
 class RedBlackTree {
-private:
+   private:
     /* data */
     Node *root;
     int currentSize;
@@ -29,7 +30,8 @@ private:
     void SetRoot(Node *root);
 
     static void Visit(Node *node, std::vector<DataEntry_t> &nodesList);
-public:
+
+   public:
     explicit RedBlackTree(Node *root = nullptr);
 
     ~RedBlackTree();
@@ -82,4 +84,4 @@ public:
     static void InorderTraversal(Node *node, uint64_t key1, uint64_t key2, std::vector<DataEntry_t> &nodesList);
 };
 
-#endif // REDBLACKTREE_H
+#endif  // REDBLACKTREE_H

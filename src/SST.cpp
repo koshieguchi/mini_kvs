@@ -1,10 +1,12 @@
-#include "SST.h"
+#include "sst.h"
+
 #include <unistd.h>
+
+#include <cmath>
 #include <iostream>
 #include <limits>
-#include <queue>
 #include <list>
-#include <cmath>
+#include <queue>
 #include <set>
 
 SST::SST(std::string &fileName, uint64_t fileDataByteSize, BloomFilter *bloomFilter) {
@@ -17,37 +19,21 @@ SST::SST(std::string &fileName, uint64_t fileDataByteSize, BloomFilter *bloomFil
     this->scanInputReader = nullptr;
 }
 
-std::string SST::GetFileName() {
-    return this->fileName;
-}
+std::string SST::GetFileName() { return this->fileName; }
 
-uint64_t SST::GetFileDataSize() const {
-    return this->fileDataByteSize;
-}
+uint64_t SST::GetFileDataSize() const { return this->fileDataByteSize; }
 
-void SST::SetFileDataSize(uint64_t newFileDataByteSize) {
-    this->fileDataByteSize = newFileDataByteSize;
-}
+void SST::SetFileDataSize(uint64_t newFileDataByteSize) { this->fileDataByteSize = newFileDataByteSize; }
 
-InputReader *SST::GetInputReader() {
-    return this->inputReader;
-}
+InputReader *SST::GetInputReader() { return this->inputReader; }
 
-void SST::SetInputReader(InputReader *newInputReader) {
-    this->inputReader = newInputReader;
-}
+void SST::SetInputReader(InputReader *newInputReader) { this->inputReader = newInputReader; }
 
-uint64_t SST::GetMaxOffsetToReadLeaves() const {
-    return this->maxOffsetToReadLeaves;
-}
+uint64_t SST::GetMaxOffsetToReadLeaves() const { return this->maxOffsetToReadLeaves; }
 
-ScanInputReader *SST::GetScanInputReader() {
-    return this->scanInputReader;
-}
+ScanInputReader *SST::GetScanInputReader() { return this->scanInputReader; }
 
-void SST::SetScanInputReader(ScanInputReader *newScanInputReader) {
-    this->scanInputReader = newScanInputReader;
-}
+void SST::SetScanInputReader(ScanInputReader *newScanInputReader) { this->scanInputReader = newScanInputReader; }
 
 std::vector<uint64_t> SST::GetBTreeLevelOffsets(int leavesNumPages) {
     // B = SST::KEYS_PER_PAGE
@@ -55,7 +41,7 @@ std::vector<uint64_t> SST::GetBTreeLevelOffsets(int leavesNumPages) {
     uint64_t numPagesInLevel = leavesNumPages;
     levelsSizes.push_back(numPagesInLevel);
     while (numPagesInLevel > 1) {
-        numPagesInLevel = std::ceil(numPagesInLevel / (double) SST::KEYS_PER_PAGE);
+        numPagesInLevel = std::ceil(numPagesInLevel / (double)SST::KEYS_PER_PAGE);
         levelsSizes.push_back(numPagesInLevel);
     }
 
@@ -71,11 +57,11 @@ std::vector<uint64_t> SST::GetBTreeLevelOffsets(int leavesNumPages) {
 }
 
 void SST::SetupBTreeFile() {
-    int leavesNumPages = std::ceil(this->GetFileDataSize() / (double) SST::PAGE_SIZE);
+    int leavesNumPages = std::ceil(this->GetFileDataSize() / (double)SST::PAGE_SIZE);
     std::vector<uint64_t> levelOffsets = this->GetBTreeLevelOffsets(leavesNumPages);
 
     // Make B-tree levels
-    for (uint64_t levelOffset: levelOffsets) {
+    for (uint64_t levelOffset : levelOffsets) {
         auto *level = new BTreeLevel(levelOffset * SST::PAGE_SIZE);
         this->bTreeLevels.push_back(level);
     }
@@ -91,7 +77,7 @@ void SST::WriteEndOfBTreeFile(std::ofstream &file) {
     }
     this->WriteBTreeMetaData(file);
 
-    // We do not need the bloom filter's array anymore, 
+    // We do not need the bloom filter's array anymore,
     // since from now on, we will read it from the static sst file.
     if (this->bloomFilter != nullptr) {
         this->bloomFilter->ClearFilterArray();
@@ -100,9 +86,8 @@ void SST::WriteEndOfBTreeFile(std::ofstream &file) {
 }
 
 void SST::WriteFile(std::ofstream &file, std::vector<DataEntry_t> &data, SearchType searchType, bool endOfFile) {
-
     if (searchType == SearchType::BINARY_SEARCH) {
-        for (DataEntry_t &i: data) {
+        for (DataEntry_t &i : data) {
             file.write(reinterpret_cast<const char *>(&i.first), sizeof(uint64_t));
             file.write(reinterpret_cast<const char *>(&i.second), sizeof(uint64_t));
         }
@@ -120,7 +105,7 @@ void SST::WriteFile(std::ofstream &file, std::vector<DataEntry_t> &data, SearchT
         /* Page 1 of the file: */
         /* Number of B-tree levels | page index where level 1 starts | page index where level 2 starts | ...    | */
         /* Next pages of the file: */
-        /* | level 0 (i.e. root node) | level 1 | ... | level 2 | ... | 
+        /* | level 0 (i.e. root node) | level 1 | ... | level 2 | ... |
         Number of pages of the bloomFilter | Page where the bloomFilter starts| */
         this->WriteBTreeLevels(file, data, endOfFile);
     }
@@ -139,7 +124,6 @@ void SST::WriteExtraToAlign(std::ofstream &file, uint64_t extraSpace) {
 }
 
 void SST::WriteBTreeMetaData(std::ofstream &file) {
-
     uint64_t numLevels = this->bTreeLevels.size();
 
     // MetaData will be the first page
@@ -148,25 +132,25 @@ void SST::WriteBTreeMetaData(std::ofstream &file) {
 
     // Write the BTree's metadata.
     for (uint64_t i = 0; i < numLevels; i++) {
-        uint64_t levelStartOffset = std::ceil(this->bTreeLevels[i]->GetStartingByteOffset() / (double) SST::PAGE_SIZE);
+        uint64_t levelStartOffset = std::ceil(this->bTreeLevels[i]->GetStartingByteOffset() / (double)SST::PAGE_SIZE);
         file.write(reinterpret_cast<const char *>(&levelStartOffset), sizeof(uint64_t));
     }
 
     // Write the bloom filter's metadata.
     if (this->bloomFilter != nullptr) {
-        uint64_t bloomfilterNumPages = std::ceil(this->bloomFilter->GetFilterArraySize() / (double) SST::KEYS_PER_PAGE);
+        uint64_t bloomfilterNumPages = std::ceil(this->bloomFilter->GetFilterArraySize() / (double)SST::KEYS_PER_PAGE);
         file.write(reinterpret_cast<const char *>(&bloomfilterNumPages), sizeof(uint64_t));
 
         // Write where the bloom filter starts.
         uint64_t nextByteOffsetToWrite = this->bTreeLevels[numLevels - 1]->GetNextByteOffsetToWrite();
-        uint64_t bloomFilterStartPage = std::ceil(nextByteOffsetToWrite / (double) SST::PAGE_SIZE);
+        uint64_t bloomFilterStartPage = std::ceil(nextByteOffsetToWrite / (double)SST::PAGE_SIZE);
         file.write(reinterpret_cast<const char *>(&bloomFilterStartPage), sizeof(uint64_t));
     }
     SST::WriteExtraToAlign(file, 1);
 }
 
 void SST::AddNextInternalLevelFenceKeys(std::vector<uint64_t> &data, int nextLevel) {
-    int numInternalNodes = std::ceil(data.size() / (double) SST::KEYS_PER_PAGE);
+    int numInternalNodes = std::ceil(data.size() / (double)SST::KEYS_PER_PAGE);
     for (int i = 1; i <= numInternalNodes; i++) {
         size_t lastIndex = (i * SST::KEYS_PER_PAGE) - 1;
         if (lastIndex >= data.size()) {
@@ -201,9 +185,8 @@ void SST::WriteBTreeInternalLevels(std::ofstream &file, bool endOfFile) {
 }
 
 void SST::WriteBTreeLevels(std::ofstream &file, std::vector<DataEntry_t> &data, bool endOfFile) {
-
     uint64_t numLevels = this->bTreeLevels.size();
-    int numLeaves = std::ceil(data.size() / (double) SST::KV_PAIRS_PER_PAGE);
+    int numLeaves = std::ceil(data.size() / (double)SST::KV_PAIRS_PER_PAGE);
     if (numLevels > 1) {
         for (int i = 1; i <= numLeaves; i++) {
             size_t lastPairIndex = (i * SST::KV_PAIRS_PER_PAGE) - 1;
@@ -218,7 +201,7 @@ void SST::WriteBTreeLevels(std::ofstream &file, std::vector<DataEntry_t> &data, 
     // Write the leaves by seeking to the beginning of where the leaves level starts
     uint64_t leavesOffsetToWrite = this->bTreeLevels[numLevels - 1]->GetNextByteOffsetToWrite();
     file.seekp(leavesOffsetToWrite, std::ios_base::beg);
-    for (DataEntry_t &i: data) {
+    for (DataEntry_t &i : data) {
         file.write(reinterpret_cast<const char *>(&i.first), sizeof(uint64_t));
         file.write(reinterpret_cast<const char *>(&i.second), sizeof(uint64_t));
     }
@@ -226,7 +209,7 @@ void SST::WriteBTreeLevels(std::ofstream &file, std::vector<DataEntry_t> &data, 
 
     if (endOfFile) {
         uint64_t nextByteOffsetToWrite = this->bTreeLevels[numLevels - 1]->GetNextByteOffsetToWrite();
-        this->maxOffsetToReadLeaves = std::ceil(nextByteOffsetToWrite / (double) SST::PAGE_SIZE) - 1;
+        this->maxOffsetToReadLeaves = std::ceil(nextByteOffsetToWrite / (double)SST::PAGE_SIZE) - 1;
 
         // Mark the last valid value of a page by an invalidValue, if the data is not page-aligned.
         if (data.size() % KV_PAIRS_PER_PAGE) {
@@ -291,7 +274,7 @@ std::vector<uint64_t> SST::ReadBloomFilter(int fd, uint64_t offset, uint64_t num
     }
 
     uint64_t numElements = numPagesToRead * SST::KEYS_PER_PAGE;
-    std::vector<uint64_t> data((uint64_t *) buffer, (uint64_t *) buffer + numElements);
+    std::vector<uint64_t> data((uint64_t *)buffer, (uint64_t *)buffer + numElements);
     delete[] buffer;
     return data;
 }
@@ -358,7 +341,7 @@ uint64_t SST::PerformBinarySearch(uint64_t key, BufferPool *bufferPool) {
         // read this page and insert it into the buffer pool.
         std::string pageId = this->GetPageIdInBufferPool(offsetToRead);
         std::vector<uint64_t> data = SST::GetPage(pageId, fd, offsetToRead, bufferPool);
-        if (data.empty()) { // No more data in SST, break out of the loop
+        if (data.empty()) {  // No more data in SST, break out of the loop
             break;
         }
 
@@ -372,7 +355,7 @@ uint64_t SST::PerformBinarySearch(uint64_t key, BufferPool *bufferPool) {
             int index = Utils::BinarySearch(keys, key);
             // Found the data, break out of the loop
             if (index < keys.size() && keys[index] == key) {
-                value = data[index * 2 + 1]; // values are in odd indexes
+                value = data[index * 2 + 1];  // values are in odd indexes
             }
             break;
         }
@@ -385,7 +368,7 @@ uint64_t SST::FindKeyInBTree(int fd, uint64_t key, BufferPool *bufferPool, std::
     uint64_t value = Utils::INVALID_VALUE;
     uint64_t numOfLevels = levelsPageOffsets.size();
     uint64_t currLevel = 0;
-    uint64_t offsetToRead = levelsPageOffsets[0]; // Should be 1 always
+    uint64_t offsetToRead = levelsPageOffsets[0];  // Should be 1 always
     uint64_t prevLevelChildIndex = 0;
     int index;
     while (currLevel < numOfLevels) {
@@ -403,7 +386,7 @@ uint64_t SST::FindKeyInBTree(int fd, uint64_t key, BufferPool *bufferPool, std::
 
             index = Utils::BinarySearch(keys, key);
             if (index < keys.size() && keys[index] == key) {
-                value = data[index * 2 + 1]; // values are in odd indexes
+                value = data[index * 2 + 1];  // values are in odd indexes
             }
             return value;
         } else {
@@ -445,7 +428,7 @@ uint64_t SST::PerformBTreeSearch(uint64_t key, BufferPool *bufferPool, bool isLS
     // Check the bloom filter if one is defined for this sst file.
     if (isLSMTree) {
         uint64_t numPagesToRead = metadata[numOfLevels + 1];
-        offsetToRead = metadata[numOfLevels + 2]; // offset where the bloom filter starts
+        offsetToRead = metadata[numOfLevels + 2];  // offset where the bloom filter starts
         std::string pageId = this->GetPageIdInBufferPool(offsetToRead);
         auto bloomFilterArray = SST::GetBloomFilterPages(pageId, fd, offsetToRead, numPagesToRead, bufferPool);
         if (this->bloomFilter && !this->bloomFilter->KeyProbablyExists(key, bloomFilterArray)) {
@@ -474,7 +457,7 @@ void SST::PerformBinaryScan(uint64_t key1, uint64_t key2, std::vector<DataEntry_
 
     // Read the file and do a binary search on that to look for the key1
     bool foundKey1 = false;
-    int numOfPagesOfFile = ceil((double) this->fileDataByteSize / SST::PAGE_SIZE);
+    int numOfPagesOfFile = ceil((double)this->fileDataByteSize / SST::PAGE_SIZE);
     int start = 0;
     int end = numOfPagesOfFile - 1;
     int offsetToRead;
@@ -498,7 +481,7 @@ void SST::PerformBinaryScan(uint64_t key1, uint64_t key2, std::vector<DataEntry_
         } else if (key1 > keys[keys.size() - 1]) {
             start = offsetToRead + 1;
             // Skip this page
-            startIndex = std::numeric_limits<int>::max(); // max value
+            startIndex = std::numeric_limits<int>::max();  // max value
             if (offsetToRead == numOfPagesOfFile - 1) {
                 close(fd);
                 return;

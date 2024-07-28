@@ -1,8 +1,10 @@
-#include "LSMTree.h"
+#include "lsmtree.h"
+
 #include <unistd.h>
-#include <queue>
+
 #include <bitset>
 #include <functional>
+#include <queue>
 
 LSMTree::LSMTree(int bloomFilterBitsPerEntry, int inputBufferCapacity, int outputBufferCapacity) {
     this->levels = {};
@@ -12,7 +14,7 @@ LSMTree::LSMTree(int bloomFilterBitsPerEntry, int inputBufferCapacity, int outpu
 }
 
 LSMTree::~LSMTree() {
-    for (auto level: this->levels) {
+    for (auto level : this->levels) {
         delete level;
     }
 }
@@ -43,17 +45,13 @@ void LSMTree::WriteMemtableData(std::vector<DataEntry_t> &data, SearchType searc
     LSMTree::MaintainLevelCapacityAndCompact(this->levels[0], dbPath);
 }
 
-std::vector<Level *> LSMTree::GetLevels() {
-    return this->levels;
-}
+std::vector<Level *> LSMTree::GetLevels() { return this->levels; }
 
-void LSMTree::AddLevel(Level *level) {
-    this->levels.push_back(level);
-}
+void LSMTree::AddLevel(Level *level) { this->levels.push_back(level); }
 
 uint64_t LSMTree::Get(uint64_t key, BufferPool *bufferPool) {
     // Goes through each level in the tree in top-down fashion
-    for (Level *level: this->levels) {
+    for (Level *level : this->levels) {
         if (level->GetSSTFiles().empty()) {  // Skip empty levels
             continue;
         }
@@ -61,16 +59,16 @@ uint64_t LSMTree::Get(uint64_t key, BufferPool *bufferPool) {
         // Given the size ratio is 2, there is one sst file in this level, so we can search in it.
         // In an LSM tree with size ratio of greater than 2, we would need to make sure we traverse
         // from the most recent file of each level first, but we do not need to handle this in our case.
-        for (SST *sstFile: level->GetSSTFiles()) {
+        for (SST *sstFile : level->GetSSTFiles()) {
             uint64_t value = sstFile->PerformBTreeSearch(key, bufferPool, true);
             if (value == Utils::DELETED_KEY_VALUE) {
-                return Utils::INVALID_VALUE; // Key does not exist since it has been deleted.
+                return Utils::INVALID_VALUE;  // Key does not exist since it has been deleted.
             } else if (value != Utils::INVALID_VALUE) {
-                return value; // Key exists.
+                return value;  // Key exists.
             }
         }
     }
-    return Utils::INVALID_VALUE; // Key does not exist.
+    return Utils::INVALID_VALUE;  // Key does not exist.
 }
 
 void LSMTree::Scan(uint64_t key1, uint64_t key2, std::vector<DataEntry_t> &scanResult) {
@@ -87,7 +85,7 @@ void LSMTree::Scan(uint64_t key1, uint64_t key2, std::vector<DataEntry_t> &scanR
             curKeyToLookForCounter++;
             if (!level->GetSSTFiles().empty()) {
                 // In case of size ratio of 2, there is at most one sst file in each level.
-                for (SST *sstFile: level->GetSSTFiles()) {
+                for (SST *sstFile : level->GetSSTFiles()) {
                     int fd = Utils::OpenFile(sstFile->GetFileName());
                     if (fd == -1) {
                         return;

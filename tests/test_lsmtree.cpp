@@ -1,8 +1,9 @@
+#include <filesystem>
 #include <string>
 #include <vector>
-#include <filesystem>
-#include "LSMTree.h"
+
 #include "TestBase.h"
+#include "lsmtree.h"
 
 namespace fs = std::filesystem;
 
@@ -147,7 +148,7 @@ class TestLSMTree : public TestBase {
         result &= lsmTree->GetLevels()[1]->GetSSTFiles()[0]->GetFileName() == dbDirPath + "/level1-0.sst";
         result &= v1 == 2560 && v2 == 25570 && v3 == 2624000;
         result &= v4 == std::numeric_limits<uint64_t>::max();
-        result &= v5 == std::numeric_limits<uint64_t>::max(); // Not found keys
+        result &= v5 == std::numeric_limits<uint64_t>::max();  // Not found keys
 
         // 3. Clean up
         fs::remove_all(dbDirPath);
@@ -185,7 +186,7 @@ class TestLSMTree : public TestBase {
         uint64_t valuesSumInScan = 0;
         std::vector<DataEntry_t> nodesList;
         lsmTree->Scan(3, (5 * 1024 * 256) + 100, nodesList);
-        for (DataEntry_t pair: nodesList) {
+        for (DataEntry_t pair : nodesList) {
             valuesSumInScan += pair.second;
         }
         result &= lsmTree->GetLevels().size() == 2;
@@ -249,8 +250,8 @@ class TestLSMTree : public TestBase {
         // Test the key that has never existed.
         uint64_t valuesSumInScan = 0;
         std::vector<DataEntry_t> nodesList;
-        lsmTree->Scan(0, 263000, nodesList); // existing keys are 0 to 262144
-        for (DataEntry_t pair: nodesList) {
+        lsmTree->Scan(0, 263000, nodesList);  // existing keys are 0 to 262144
+        for (DataEntry_t pair : nodesList) {
             valuesSumInScan += pair.second;
         }
         result &= lsmTree->GetLevels().size() == 2;
@@ -265,16 +266,16 @@ class TestLSMTree : public TestBase {
         return result;
     }
 
-public:
+   public:
     bool RunTests() override {
         bool allTestPassed = true;
         allTestPassed &= assertTrue(TestWriteMemtableData, "TestLSMTree::TestWriteMemtableData");
-        allTestPassed &= assertTrue(TestMaintainLevelsCapacityAndCompact,
-                                    "TestLSMTree::TestMaintainLevelsCapacityAndCompact");
+        allTestPassed &=
+            assertTrue(TestMaintainLevelsCapacityAndCompact, "TestLSMTree::TestMaintainLevelsCapacityAndCompact");
         allTestPassed &= assertTrue(TestGetWithAllUniqueKeys, "TestLSMTree::TestGetWithAllUniqueKeys");
         allTestPassed &= assertTrue(TestScanWithAllUniqueKeys, "TestLSMTree::TestScanWithAllUniqueKeys");
-        allTestPassed &= assertTrue(TestScanAndGetWithUpdatedAndDeletedKeys,
-                                    "TestLSMTree::TestScanAndGetWithUpdatedAndDeletedKeys");
+        allTestPassed &=
+            assertTrue(TestScanAndGetWithUpdatedAndDeletedKeys, "TestLSMTree::TestScanAndGetWithUpdatedAndDeletedKeys");
         return allTestPassed;
     }
 };

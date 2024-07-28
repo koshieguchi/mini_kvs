@@ -1,10 +1,11 @@
 
-#include "Db.h"
-#include <filesystem>
+#include "db.h"
+
 #include <algorithm>
-#include <set>
-#include <map>
 #include <cmath>
+#include <filesystem>
+#include <map>
+#include <set>
 
 namespace fs = std::filesystem;
 
@@ -22,7 +23,7 @@ Db::~Db() {
     delete this->memtable;
     delete this->bufferPool;
     delete this->lsmTree;
-    for (auto sst: this->allSSTs) {
+    for (auto sst : this->allSSTs) {
         delete sst;
     }
     this->allSSTs.clear();
@@ -40,7 +41,7 @@ bool Db::Open(const std::string &path) {
     }
 
     std::multimap<std::string, SST *> levelsMap;
-    for (const auto &entry: fs::directory_iterator(this->dbPath)) {
+    for (const auto &entry : fs::directory_iterator(this->dbPath)) {
         if (fs::is_regular_file(entry) && entry.path().extension() == Utils::SST_FILE_EXTENSION) {
             std::string fileNameStem = entry.path().stem().string();
             std::string filePath = Utils::EnsureDirSlash(this->dbPath) + Utils::GetFilenameWithExt(fileNameStem);
@@ -71,7 +72,7 @@ void Db::Close() {
     }
 
     // Clear out all SST file objects
-    for (auto sstFile: this->allSSTs) {
+    for (auto sstFile : this->allSSTs) {
         delete sstFile;
     }
     this->allSSTs.clear();

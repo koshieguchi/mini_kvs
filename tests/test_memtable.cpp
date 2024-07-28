@@ -1,7 +1,7 @@
 #include <algorithm>
-#include "Memtable.h"
-#include "TestBase.h"
 
+#include "TestBase.h"
+#include "memtable.h"
 
 class TestMemtable : public TestBase {
     static bool TestGetMaxSize() {
@@ -47,12 +47,8 @@ class TestMemtable : public TestBase {
         }
 
         bool result = true;
-        DataEntry_t expected[4] = {
-                std::make_pair(2, 3),
-                std::make_pair(3, 4),
-                std::make_pair(4, 5),
-                std::make_pair(5, 6)
-        };
+        DataEntry_t expected[4] = {std::make_pair(2, 3), std::make_pair(3, 4), std::make_pair(4, 5),
+                                   std::make_pair(5, 6)};
         for (int i = 0; i < 4; i++) {
             result &= expected[i].first == data[i].first;
             result &= expected[i].second == data[i].second;
@@ -87,7 +83,7 @@ class TestMemtable : public TestBase {
         return memtable->GetCurrentSize() == 0;
     }
 
-public:
+   public:
     bool RunTests() override {
         bool allTestPassed = true;
         allTestPassed &= assertTrue(TestGetMaxSize, "TestMemtable::TestGetMaxSize");

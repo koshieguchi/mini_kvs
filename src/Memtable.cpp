@@ -1,4 +1,4 @@
-#include "Memtable.h"
+#include "memtable.h"
 
 // Memtable constructor
 Memtable::Memtable(int maxSize) {
@@ -6,9 +6,7 @@ Memtable::Memtable(int maxSize) {
     this->redBlackTree = new RedBlackTree();
 }
 
-Memtable::~Memtable() {
-    delete this->redBlackTree;
-}
+Memtable::~Memtable() { delete this->redBlackTree; }
 
 bool Memtable::Put(uint64_t key, uint64_t value) {
     if (this->GetCurrentSize() + 1 > this->maxSize) {
@@ -18,9 +16,7 @@ bool Memtable::Put(uint64_t key, uint64_t value) {
     return true;
 }
 
-uint64_t Memtable::Get(uint64_t key) {
-    return this->redBlackTree->Search(key);
-}
+uint64_t Memtable::Get(uint64_t key) { return this->redBlackTree->Search(key); }
 
 std::vector<DataEntry_t> Memtable::Scan(uint64_t key1, uint64_t key2) {
     std::vector<DataEntry_t> nodesList;
@@ -28,13 +24,9 @@ std::vector<DataEntry_t> Memtable::Scan(uint64_t key1, uint64_t key2) {
     return nodesList;
 }
 
-int Memtable::GetMaxSize() const {
-    return this->maxSize;
-}
+int Memtable::GetMaxSize() const { return this->maxSize; }
 
-int Memtable::GetCurrentSize() {
-    return this->redBlackTree->GetCurrentSize();
-}
+int Memtable::GetCurrentSize() { return this->redBlackTree->GetCurrentSize(); }
 
 std::vector<DataEntry_t> Memtable::GetAllData() {
     return this->Scan(this->redBlackTree->GetMinKey(), this->redBlackTree->GetMaxKey());

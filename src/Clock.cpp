@@ -1,9 +1,7 @@
 
-#include "Clock.h"
+#include "clock.h"
 
-Clock::Clock() {
-    this->handle = 0;
-}
+Clock::Clock() { this->handle = 0; }
 
 void Clock::Insert(Page *page) {
     auto it = std::next(this->pages.begin(), this->handle);
@@ -11,9 +9,7 @@ void Clock::Insert(Page *page) {
     page->SetAccessBit(0);
 }
 
-void Clock::UpdatePageAccessStatus(Page *accessedPage) {
-    accessedPage->SetAccessBit(1);
-}
+void Clock::UpdatePageAccessStatus(Page *accessedPage) { accessedPage->SetAccessBit(1); }
 
 Page *Clock::GetPageToEvict() {
     auto it = std::next(this->pages.begin(), this->handle);

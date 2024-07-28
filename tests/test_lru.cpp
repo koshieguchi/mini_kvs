@@ -1,9 +1,8 @@
 
 #include "TestBase.h"
-#include "LRU.h"
+#include "lru.h"
 
 class TestLRU : public TestBase {
-
     static bool TestInsert() {
         // Set up
         auto page = new Page("test", {1});
@@ -69,7 +68,7 @@ class TestLRU : public TestBase {
         return result;
     }
 
-public:
+   public:
     bool RunTests() override {
         bool allTestPassed = true;
         allTestPassed &= assertTrue(TestInsert, "TestLRU::TestInsert");

@@ -4,8 +4,8 @@
 #include <fstream>
 #include <vector>
 
-#include "SST.h"
-#include "Utils.h"
+#include "sst.h"
+#include "utils.h"
 
 /**
  * Class representing an Output Buffer writer for LSM-Tree.

@@ -5,7 +5,7 @@
 #include <cstdint>
 #include <forward_list>
 
-#include "Page.h"
+#include "page.h"
 
 /**
  * Class representing a Bucket in a Extendible Hashtable data structure.

@@ -1,4 +1,4 @@
-#include "LRU.h"
+#include "lru.h"
 
 LRU::LRU() {
     this->evictionQueueHead = nullptr;
@@ -68,6 +68,4 @@ Page *LRU::GetPageToEvict() {
     return pageToEvict;
 }
 
-EvictionQueueNode *LRU::GetQueueHead() {
-    return this->evictionQueueHead;
-}
+EvictionQueueNode *LRU::GetQueueHead() { return this->evictionQueueHead; }

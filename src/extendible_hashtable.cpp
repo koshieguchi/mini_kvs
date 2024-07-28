@@ -1,8 +1,10 @@
 
-#include <set>
+#include "extendible_hashtable.h"
+
 #include <cmath>
-#include "ExtendibleHashtable.h"
-#include "Utils.h"
+#include <set>
+
+#include "utils.h"
 
 ExtendibleHashtable::ExtendibleHashtable(int minSize, int maxSize, int bucketMaxSize) {
     // globalDepth always changes between minDepth <= globalDepth <= maxDepth.
@@ -20,7 +22,7 @@ ExtendibleHashtable::ExtendibleHashtable(int minSize, int maxSize, int bucketMax
 ExtendibleHashtable::~ExtendibleHashtable() {
     // First gather buckets into set as some directory may point to same bucket
     std::set<Bucket *> erasedBuckets;
-    for (auto const &[_, bucket]: this->buckets) {
+    for (auto const &[_, bucket] : this->buckets) {
         erasedBuckets.insert(bucket);
     }
 
@@ -31,7 +33,7 @@ ExtendibleHashtable::~ExtendibleHashtable() {
 }
 
 std::string ExtendibleHashtable::Hash(const std::string &pageId) const {
-    void *const buffer = (void *const) pageId.c_str();
+    void *const buffer = (void *const)pageId.c_str();
     XXH64_hash_t hash = XXH64(buffer, pageId.size(), 1);
     return Utils::GetBinaryFromInt(hash, this->globalDepth);
 }
@@ -44,7 +46,7 @@ bool ExtendibleHashtable::ExpandDirectory() {
 
     this->globalDepth++;
     std::map<std::string, Bucket *> iterCopy(this->buckets.begin(), this->buckets.end());
-    for (auto const &[oldId, bucket]: iterCopy) {
+    for (auto const &[oldId, bucket] : iterCopy) {
         // Replace old ID with new expanded one. The overflowing bucket will have its "1" variant
         // pointing to a new bucket while the rest will have both new IDs point to the same bucket
         this->buckets.emplace("0" + oldId, bucket);
@@ -61,12 +63,12 @@ void ExtendibleHashtable::Shrink() {
     }
 
     std::map<std::string, Bucket *> iterCopy(this->buckets.begin(), this->buckets.end());
-    for (auto const &[bucketId, bucket]: iterCopy) {
+    for (auto const &[bucketId, bucket] : iterCopy) {
         this->Merge(bucketId);
     }
 
     this->globalDepth--;
-    for (auto const &[oldId, bucket]: iterCopy) {
+    for (auto const &[oldId, bucket] : iterCopy) {
         // Replace old ID with new shrunk one and erase the old ID. There are two old IDs that will
         // have same shrunken ID, but since we are using a map, this won't be a problem
         this->buckets[oldId.substr(1)] = bucket;
@@ -134,7 +136,7 @@ void ExtendibleHashtable::Merge(const std::string &bucketId) {
 
     // Move all pages from currBucket to pairBucket, delete the currBucket object
     // and reassign current directory to pairBucket
-    std::forward_list<Page *>pages = currBucket->GetPages();
+    std::forward_list<Page *> pages = currBucket->GetPages();
     for (Page *page : pages) {
         pairBucket->Insert(page);
     }
@@ -143,22 +145,16 @@ void ExtendibleHashtable::Merge(const std::string &bucketId) {
     this->buckets[bucketId] = pairBucket;
 }
 
-int ExtendibleHashtable::GetGlobalDepth() const {
-    return this->globalDepth;
-}
+int ExtendibleHashtable::GetGlobalDepth() const { return this->globalDepth; }
 
-int ExtendibleHashtable::GetSize() const {
-    return this->size;
-}
+int ExtendibleHashtable::GetSize() const { return this->size; }
 
-size_t ExtendibleHashtable::GetNumDirectory() const {
-    return this->buckets.size();
-}
+size_t ExtendibleHashtable::GetNumDirectory() const { return this->buckets.size(); }
 
 int ExtendibleHashtable::GetNumBuckets() const {
     int count = 0;
     std::set<Bucket *> bucketSet;
-    for (auto const &[_, bucket]: this->buckets) {
+    for (auto const &[_, bucket] : this->buckets) {
         if (bucketSet.count(bucket) == 0) {
             bucketSet.insert(bucket);
             count++;

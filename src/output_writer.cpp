@@ -1,4 +1,5 @@
-#include "OutputWriter.h"
+#include "output_writer.h"
+
 #include <iostream>
 
 OutputWriter::OutputWriter(SST *sstFile, int capacity) {

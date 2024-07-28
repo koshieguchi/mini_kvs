@@ -1,11 +1,10 @@
-#include <string>
 #include <iostream>
-#include "SST.h"
-#include "TestBase.h"
+#include <string>
 
+#include "TestBase.h"
+#include "sst.h"
 
 class TestSST : public TestBase {
-
     static bool TestWriteFile() {
         std::string filename = Utils::GetFilenameWithExt("test");
         std::vector<DataEntry_t> dataToWrite = {std::make_pair(1, 2), std::make_pair(2, 3)};
@@ -26,11 +25,8 @@ class TestSST : public TestBase {
         // Setup
         std::string filename = Utils::GetFilenameWithExt("test");
         std::vector<DataEntry_t> dataToWrite = {
-                std::make_pair(1, 2),
-                std::make_pair(2, 3),
-                std::make_pair(3, 3),
-                std::make_pair(4, 3),
-                std::make_pair(5, 3),
+            std::make_pair(1, 2), std::make_pair(2, 3), std::make_pair(3, 3),
+            std::make_pair(4, 3), std::make_pair(5, 3),
         };
         SST *sstFile = new SST(filename, dataToWrite.size() * SST::KV_PAIR_BYTE_SIZE);
         std::ofstream file(sstFile->GetFileName(), std::ios::out | std::ios::binary);
@@ -231,7 +227,7 @@ class TestSST : public TestBase {
         return result;
     }
 
-public:
+   public:
     bool RunTests() override {
         bool allTestPassed = true;
         allTestPassed &= assertTrue(TestWriteFile, "TestSST::TestWriteFile");

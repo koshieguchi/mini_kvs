@@ -1,4 +1,5 @@
-#include "ScanInputReader.h"
+#include "scan_input_reader.h"
+
 #include <iostream>
 
 ScanInputReader::ScanInputReader(uint64_t capacity) {
@@ -26,9 +27,7 @@ void ScanInputReader::ReadDataPagesIntoBuffer(int fd) {
     this->startIndex = 0;
 }
 
-bool ScanInputReader::IsLeavesRangeToScanSet() const {
-    return this->endOffsetToScan != Utils::INVALID_VALUE;
-}
+bool ScanInputReader::IsLeavesRangeToScanSet() const { return this->endOffsetToScan != Utils::INVALID_VALUE; }
 
 void ScanInputReader::SetLeavesRangeToScan(uint64_t newStartOffsetToScan, uint64_t newEndOffsetToScan, int fd) {
     this->offsetToRead = newStartOffsetToScan;
@@ -43,9 +42,7 @@ void ScanInputReader::SetKeys() {
     }
 }
 
-int ScanInputReader::GetInputBufferSize() {
-    return this->inputBuffer.size();
-}
+int ScanInputReader::GetInputBufferSize() { return this->inputBuffer.size(); }
 
 DataEntry_t ScanInputReader::FindKey(uint64_t key, int fd) {
     // Set the default entry to INVALID_VALUE
@@ -66,6 +63,4 @@ DataEntry_t ScanInputReader::FindKey(uint64_t key, int fd) {
     return entry;
 }
 
-bool ScanInputReader::IsScannedCompletely() const {
-    return this->isScannedCompletely;
-}
+bool ScanInputReader::IsScannedCompletely() const { return this->isScannedCompletely; }

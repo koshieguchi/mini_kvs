@@ -1,6 +1,6 @@
 
 #include "TestBase.h"
-#include "Utils.h"
+#include "utils.h"
 
 class TestUtils : public TestBase {
     static bool TestBinarySearch() {
@@ -43,7 +43,7 @@ class TestUtils : public TestBase {
         return result;
     }
 
-public:
+   public:
     bool RunTests() override {
         bool allTestPassed = true;
         allTestPassed &= assertTrue(TestBinarySearch, "TestUtils::TestBinarySearch");

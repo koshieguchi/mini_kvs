@@ -2,7 +2,7 @@
 #ifndef EVICTIONPOLICY_H
 #define EVICTIONPOLICY_H
 
-#include "Page.h"
+#include "page.h"
 
 enum EvictionPolicyType { LRU_t = 0, CLOCK_t = 1 };
 

@@ -1,9 +1,10 @@
+#include "level.h"
+
+#include <unistd.h>
+
 #include <cmath>
 #include <filesystem>
 #include <iostream>
-#include <unistd.h>
-#include "Level.h"
-
 
 Level::Level(int level, int bloomFilterBitsPerEntry, int inputBufferCapacity, int outputBufferCapacity) {
     this->level = level;
@@ -14,14 +15,12 @@ Level::Level(int level, int bloomFilterBitsPerEntry, int inputBufferCapacity, in
 }
 
 Level::~Level() {
-    for (auto sstFile: this->sstFiles) {
+    for (auto sstFile : this->sstFiles) {
         delete sstFile;
     }
 }
 
-int Level::GetLevelNumber() const {
-    return this->level;
-}
+int Level::GetLevelNumber() const { return this->level; }
 
 void Level::WriteDataToLevel(std::vector<DataEntry_t> data, SearchType searchType, std::string &dbPath) {
     std::string fileName = Utils::GetFilenameWithExt(std::to_string(this->sstFiles.size()));
@@ -55,7 +54,7 @@ void WriteRemainingData(int fd, int index, BloomFilter *bloomFilter, InputReader
 
 void Level::SortMergeAndWriteToNextLevel(Level *nextLevel, std::string &dbPath) {
     uint64_t sstDataSize = 0;
-    for (auto sstFile: this->sstFiles) {
+    for (auto sstFile : this->sstFiles) {
         sstDataSize += sstFile->GetFileDataSize();
     }
 
@@ -68,7 +67,7 @@ void Level::SortMergeAndWriteToNextLevel(Level *nextLevel, std::string &dbPath) 
 
     sortMergedFile->SetupBTreeFile();
     sortMergedFile->SetInputReader(
-            new InputReader(sortMergedFile->GetMaxOffsetToReadLeaves(), this->inputBufferCapacity));
+        new InputReader(sortMergedFile->GetMaxOffsetToReadLeaves(), this->inputBufferCapacity));
     sortMergedFile->SetScanInputReader(new ScanInputReader(this->inputBufferCapacity));
     nextLevel->AddSSTFile(sortMergedFile);
 
@@ -145,16 +144,12 @@ void Level::SortMergeAndWriteToNextLevel(Level *nextLevel, std::string &dbPath) 
     Level::DeleteSSTFiles();
 }
 
-void Level::AddSSTFile(SST *sstFile) {
-    this->sstFiles.push_back(sstFile);
-}
+void Level::AddSSTFile(SST *sstFile) { this->sstFiles.push_back(sstFile); }
 
-std::vector<SST *> Level::GetSSTFiles() {
-    return this->sstFiles;
-}
+std::vector<SST *> Level::GetSSTFiles() { return this->sstFiles; }
 
 void Level::DeleteSSTFiles() {
-    for (auto sstFile: this->sstFiles) {
+    for (auto sstFile : this->sstFiles) {
         std::filesystem::remove(sstFile->GetFileName());
     }
     this->sstFiles = {};

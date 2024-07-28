@@ -36,7 +36,6 @@
 .DS_Store
 
 # Unneccessary test directories
-tests/test_db*
 experiments/results/*.csv
 experiments/experiment_db*
 bin/

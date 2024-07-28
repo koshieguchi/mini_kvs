@@ -7,9 +7,9 @@
 #include <vector>
 
 #include "BufferPool.h"
-#include "LSMTree.h"
-#include "Memtable.h"
 #include "SST.h"
+#include "lsmtree.h"
+#include "memtable.h"
 
 /**
  * Class representing the key-value database.

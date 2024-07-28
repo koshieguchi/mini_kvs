@@ -1,25 +1,26 @@
 #ifndef LSMTREE_H
 #define LSMTREE_H
 
-#include <vector>
 #include <string>
-#include "Level.h"
-#include "Utils.h"
-#include "BufferPool.h"
-#include "BloomFilter.h"
-#include "ScanInputReader.h"
+#include <vector>
+
+#include "bloom_filter.h"
+#include "buffer_pool.h"
+#include "level.h"
+#include "scan_input_reader.h"
+#include "utils.h"
 
 /**
  * Class representing a LSM-Tree data structure
  */
 class LSMTree {
-private:
-    std::vector<Level *> levels; // vector of levels
+   private:
+    std::vector<Level *> levels;  // vector of levels
     int bitPerEntry;
     int inputBufferCapacity;
     int outputBufferCapacity;
 
-public:
+   public:
     /**
      * Constructor for a LSMTree object.
      *
@@ -70,7 +71,6 @@ public:
     std::vector<Level *> GetLevels();
 
     void AddLevel(Level *level);
-
 };
 
-#endif // LSMTREE_H
+#endif  // LSMTREE_H

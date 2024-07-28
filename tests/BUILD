@@ -1,6 +1,6 @@
 cc_library(
     name="test_base",
-    srcs=["TestBase.h"],
+    srcs=["test_base.h"],
     copts = ["-std=c++17"],
     visibility=["//:test_pkgs"],
 )
@@ -21,7 +21,7 @@ cc_library(
 
 cc_test(
     name="test_runner",
-    srcs=["TestRunner.cpp"],
+    srcs=["test_runner.cpp"],
     copts = ["-std=c++17"],
     deps=[
         "//tests:test_targets"

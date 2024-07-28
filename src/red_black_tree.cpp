@@ -1,4 +1,5 @@
-#include "RedBlackTree.h"
+#include "red_black_tree.h"
+
 #include <iostream>
 #include <queue>
 
@@ -9,29 +10,17 @@ RedBlackTree::RedBlackTree(Node *root) {
     this->minKey = std::numeric_limits<uint64_t>::max();
 }
 
-RedBlackTree::~RedBlackTree() {
-    delete this->root;
-}
+RedBlackTree::~RedBlackTree() { delete this->root; }
 
-Node *RedBlackTree::GetRoot() {
-    return this->root;
-}
+Node *RedBlackTree::GetRoot() { return this->root; }
 
-int RedBlackTree::GetCurrentSize() const {
-    return this->currentSize;
-}
+int RedBlackTree::GetCurrentSize() const { return this->currentSize; }
 
-void RedBlackTree::SetRoot(Node *newRoot) {
-    this->root = newRoot;
-}
+void RedBlackTree::SetRoot(Node *newRoot) { this->root = newRoot; }
 
-uint64_t RedBlackTree::GetMaxKey() const {
-    return this->maxKey;
-}
+uint64_t RedBlackTree::GetMaxKey() const { return this->maxKey; }
 
-uint64_t RedBlackTree::GetMinKey() const {
-    return this->minKey;
-}
+uint64_t RedBlackTree::GetMinKey() const { return this->minKey; }
 
 uint64_t RedBlackTree::Search(uint64_t key) {
     Node *node = this->root;
@@ -49,7 +38,6 @@ uint64_t RedBlackTree::Search(uint64_t key) {
 }
 
 void RedBlackTree::ConnectParentWithNewChild(Node *parent, Node *oldChild, Node *newChild) {
-
     if (parent == nullptr) {
         this->SetRoot(newChild);
     } else if (oldChild == parent->GetRightChild()) {
@@ -67,11 +55,10 @@ void RedBlackTree::ConnectParentWithNewChild(Node *parent, Node *oldChild, Node 
 }
 
 void RedBlackTree::RotateRight(Node *node) {
-
     Node *parent = node->GetParent();
     Node *leftChild = node->GetLeftChild();
 
-    // Rotate right around the node 
+    // Rotate right around the node
     node->SetLeftChild(leftChild->GetRightChild());
     if (leftChild->GetRightChild() != nullptr) {
         leftChild->GetRightChild()->SetParent(node);
@@ -84,11 +71,10 @@ void RedBlackTree::RotateRight(Node *node) {
 }
 
 void RedBlackTree::RotateLeft(Node *node) {
-
     Node *parent = node->GetParent();
     Node *rightChild = node->GetRightChild();
 
-    // Rotate left around the node 
+    // Rotate left around the node
     node->SetRightChild(rightChild->GetLeftChild());
     if (rightChild->GetLeftChild() != nullptr) {
         rightChild->GetLeftChild()->SetParent(node);
@@ -101,7 +87,6 @@ void RedBlackTree::RotateLeft(Node *node) {
 }
 
 void RedBlackTree::Insert(uint64_t key, uint64_t value) {
-
     Node *node = this->root;
     Node *parent = nullptr;
 
@@ -139,7 +124,6 @@ void RedBlackTree::Insert(uint64_t key, uint64_t value) {
 }
 
 void RedBlackTree::MaintainRedBlackTreePropertiesAfterInsert(Node *node) {
-
     Node *parent = node->GetParent();
 
     // Case 1: The new node is the root (i.e. parent is nullptr).
@@ -183,22 +167,22 @@ void RedBlackTree::MaintainRedBlackTreePropertiesAfterInsert(Node *node) {
         MaintainRedBlackTreePropertiesAfterInsert(grandParent);
     }
 
-        // Case 4: The parent is red, but the uncle is black,
-        // (note the uncle can be a Nil node which is also considered black).
-        // Also, the new node is an inner child of its parent and grandparent (i.e. a triangular shape).
-        // In this case, do:
-        // a) Rotate at the parent node, in the opposite direction of the new node with respect to parent.
-        // b) Rotate at the grandparent node, in the opposite direction of the previous rotation in part a.
+    // Case 4: The parent is red, but the uncle is black,
+    // (note the uncle can be a Nil node which is also considered black).
+    // Also, the new node is an inner child of its parent and grandparent (i.e. a triangular shape).
+    // In this case, do:
+    // a) Rotate at the parent node, in the opposite direction of the new node with respect to parent.
+    // b) Rotate at the grandparent node, in the opposite direction of the previous rotation in part a.
 
-        // Case 5: The parent is red, but the uncle is black,
-        // (note the uncle can be a Nil node which is also considered black).
-        // But the new node is an outer child of its parent and grandparent (i.e. a straight line shape).
-        // In this case we do:
-        // Rotate at the grandparent node, in the opposite direction of the new node or parent, which
-        // both are either "right" or "left".
+    // Case 5: The parent is red, but the uncle is black,
+    // (note the uncle can be a Nil node which is also considered black).
+    // But the new node is an outer child of its parent and grandparent (i.e. a straight line shape).
+    // In this case we do:
+    // Rotate at the grandparent node, in the opposite direction of the new node or parent, which
+    // both are either "right" or "left".
 
-        // The scenarios of cases 4-b and 5 overlap, so we just implement
-        // case 4-a and 5 by mixing them as follows:
+    // The scenarios of cases 4-b and 5 overlap, so we just implement
+    // case 4-a and 5 by mixing them as follows:
     else if (parent == grandParent->GetRightChild()) {
         if (node == parent->GetLeftChild()) {
             // The new node is to the left of the parent,
@@ -215,8 +199,8 @@ void RedBlackTree::MaintainRedBlackTreePropertiesAfterInsert(Node *node) {
         // opposite direction (i.e. a left rotation) on the grandparent.
         RotateLeft(grandParent);
 
-        parent->SetColor(BLACK); // Black
-        grandParent->SetColor(RED); // Red
+        parent->SetColor(BLACK);     // Black
+        grandParent->SetColor(RED);  // Red
     } else {
         // The parent is the left child of the grandparent.
         // The new node is the right child of the parent,
@@ -234,8 +218,8 @@ void RedBlackTree::MaintainRedBlackTreePropertiesAfterInsert(Node *node) {
         // opposite direction (i.e. a right rotation) on the grandparent.
         RotateRight(grandParent);
 
-        parent->SetColor(BLACK); // Black
-        grandParent->SetColor(RED); // Red
+        parent->SetColor(BLACK);     // Black
+        grandParent->SetColor(RED);  // Red
     }
 }
 

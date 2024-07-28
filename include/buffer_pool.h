@@ -6,7 +6,7 @@
 #include <string>
 
 #include "EvictionPolicy.h"
-#include "ExtendibleHashtable.h"
+#include "extendible_hashtable.h"
 
 /**
  * Class representing a Buffer Pool in the database.

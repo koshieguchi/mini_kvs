@@ -1,7 +1,7 @@
 #ifndef EvictionQueueNode_H
 #define EvictionQueueNode_H
 
-#include "Page.h"
+#include "page.h"
 
 class Page;
 

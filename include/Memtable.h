@@ -1,19 +1,21 @@
 #ifndef MEMTABLE_H
 #define MEMTABLE_H
 
-#include "RedBlackTree.h"
-#include "Utils.h"
 #include <vector>
+
+#include "red_black_tree.h"
+#include "utils.h"
 
 /**
  * Class representing a Memtable in the database.
  */
 class Memtable {
-private:
+   private:
     /* data */
     RedBlackTree *redBlackTree;
     int maxSize;
-public:
+
+   public:
     /**
      * Constructor for a Memtable object.
      *
@@ -59,7 +61,7 @@ public:
     /**
      * Get the maximum size limit for the memtable.
      */
-    [[nodiscard]] int GetMaxSize() const; // Max of number of (key, value) pairs in memtable
+    [[nodiscard]] int GetMaxSize() const;  // Max of number of (key, value) pairs in memtable
 
     /**
      * Get the number of key-value pairs currently in the memtable.
@@ -70,7 +72,6 @@ public:
      * Reset the memtable by clearing out all key-value pairs it currently contains.
      */
     void Reset();
-
 };
 
 #endif  // MEMTABLE_H

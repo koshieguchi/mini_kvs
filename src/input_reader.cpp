@@ -1,4 +1,5 @@
-#include "InputReader.h"
+#include "input_reader.h"
+
 #include <iostream>
 
 InputReader::InputReader(uint64_t maxOffsetToRead, int capacity) {
@@ -36,6 +37,4 @@ DataEntry_t InputReader::GetEntry(int index) {
     return entry;
 }
 
-uint64_t InputReader::GetInputBufferSize() {
-    return this->inputBuffer.size();
-}
+uint64_t InputReader::GetInputBufferSize() { return this->inputBuffer.size(); }

@@ -5,7 +5,7 @@
 #include <vector>
 
 #include "EvictionPolicy.h"
-#include "Page.h"
+#include "page.h"
 
 /**
  * Class representing CLOCK eviction policy for buffer pool.
