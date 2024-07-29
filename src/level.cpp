@@ -1,114 +1,157 @@
-#include "level.hpp"
+#include "level.h"
 
-#include <fcntl.h>
 #include <unistd.h>
 
-#include <algorithm>
 #include <cmath>
 #include <filesystem>
-#include <fstream>
 #include <iostream>
-#include <regex>
-#include <vector>
 
-#include "btree.hpp"
-#include "kv_store.hpp"
-#include "utils.hpp"
-
-int Level::extract_number_from_filename(const std::string& file_name) {
-    // Use a regular expression to match the numerical part of the file name
-    std::regex regex("sst_(\\d+)\\.dat");
-    std::smatch match;
-
-    if (std::regex_search(file_name, match, regex)) {
-        std::string num = match[1];
-        return std::stoi(num);
-    }
-    return -1;
+Level::Level(int level, int bloom_filter_bits_per_entry, int input_buffer_capacity, int output_buffer_capacity) {
+    this->level = level;
+    this->bloom_filter_bits_per_entry = bloom_filter_bits_per_entry;
+    this->sst_files = {};
+    this->input_buffer_capacity = input_buffer_capacity;
+    this->output_buffer_capacity = output_buffer_capacity;
 }
 
-void Level::compact(std::filesystem::path db_path, int sst_num, bool is_last_level) {
-    std::filesystem::path new_sst_path = db_path / ("sst_" + std::to_string(sst_num) + ".dat");
+Level::~Level() {
+    for (auto sst_file : this->sst_files) {
+        delete sst_file;
+    }
+}
 
-    // TODO rewrite the merging code to use buffers and handle updates
-    BTreeNode::merge_ssts(sst_list[0], sst_list[1], new_sst_path, is_last_level);
+int Level::GetLevelNumber() const { return this->level; }
 
-    // Remove old SSTables
-    for (const auto& old_sst_path : sst_list) {
-        if (!std::filesystem::remove(old_sst_path)) {
-            std::cerr << "Failed to remove old SSTable: " << old_sst_path << std::endl;
+void Level::WriteDataToLevel(std::vector<DataEntry_t> data, SearchType search_type, std::string &kvs_path) {
+    std::string file_name = Utils::GetFilenameWithExt(std::to_string(this->sst_files.size()));
+    std::string file_path = kvs_path + "/" + Utils::LEVEL + std::to_string(this->level) + "-" + file_name;
+    uint64_t data_byte_size = data.size() * SST::KV_PAIR_BYTE_SIZE;
+    BloomFilter *bloom_filter = new BloomFilter(this->bloom_filter_bits_per_entry, data.size());
+    bloom_filter->InsertKeys(data);
+    SST *sst_file = new SST(file_path, data_byte_size, bloom_filter);
+    sst_file->SetupBTreeFile();
+    sst_file->SetInputReader(new InputReader(sst_file->GetMaxOffsetToReadLeaves(), this->input_buffer_capacity));
+    sst_file->SetScanInputReader(new ScanInputReader(this->input_buffer_capacity));
+    std::ofstream file(sst_file->GetFileName(), std::ios::out | std::ios::binary);
+    sst_file->WriteFile(file, data, search_type, true);
+    this->sst_files.push_back(sst_file);
+}
+
+void WriteRemainingData(int fd, int index, BloomFilter *bloom_filter, InputReader *reader,
+                        OutputWriter *output_writer) {
+    while (index < reader->GetInputBufferSize()) {
+        DataEntry_t entry = reader->GetEntry(index);
+        output_writer->AddToOutputBuffer(entry);
+        bloom_filter->InsertKey(entry.first);
+        index += 2;
+        // In the edge case when sst1_reader has greater keys than the sst2_reader,
+        // make sure you read all the contents of sst1_reader.
+        if (index >= reader->GetInputBufferSize()) {
+            reader->ReadDataPagesInBuffer(fd);
+            index = 0;
         }
     }
-
-    // Update sstables vector
-    sst_list.clear();
-    sst_list.push_back(new_sst_path);
 }
 
-void Level::update_levels(std::vector<Level>& levels, std::filesystem::path sst_path, std::filesystem::path db_path,
-                          BufferPool& buffer_pool) {
-    if (levels.size() == 0) {
-        add_new_level(levels);
+void Level::SortMergeAndWriteToNextLevel(Level *next_level, std::string &kvs_path) {
+    uint64_t sst_data_size = 0;
+    for (auto sst_file : this->sst_files) {
+        sst_data_size += sst_file->GetFileDataSize();
     }
-    // add to current level
-    levels[0].sst_list.push_back(sst_path);
-    // compaction, we use a while loop because compaction can happen recursively
-    int current_level = 0;
-    while (current_level < (int)levels.size()) {
-        // Level& level = levels[current_level];
-        if ((int)levels[current_level].sst_list.size() >= SIZE_RATIO) {
-            // need to compact
-            bool is_last_level = (current_level == (int)levels.size() - 1);
 
-            //  if we are already at the last level, then we have to add a new level
-            if (current_level >= (int)levels.size() - 1) {
-                add_new_level(levels);
-            }
+    // Create and setup new SST file for sort-merged data
+    std::string file_name = Utils::GetFilenameWithExt(std::to_string(next_level->sst_files.size()));
+    std::string file_path = kvs_path + "/" + Utils::LEVEL + std::to_string(next_level->level) + "-" + file_name;
+    int max_num_keys = std::ceil(sst_data_size / SST::KV_PAIR_BYTE_SIZE);
+    auto *bloom_filter = new BloomFilter(this->bloom_filter_bits_per_entry, max_num_keys);
+    SST *sort_merged_file = new SST(file_path, sst_data_size, bloom_filter);
 
-            // remove SSTs from the buffer pool because their pages are no longer
-            // valid
-            for (auto& sst : levels[current_level].sst_list) {
-                // get the number of pages the sst has based on its file size
-                int num_pages = std::ceil(std::filesystem::file_size(sst) / (double)Utils::PAGE_SIZE);
-                for (int i = 0; i < num_pages; i++) {
-                    buffer_pool.remove(Page::generate_page_id(sst, i));
-                }
-            }
+    sort_merged_file->SetupBTreeFile();
+    sort_merged_file->SetInputReader(
+        new InputReader(sort_merged_file->GetMaxOffsetToReadLeaves(), this->input_buffer_capacity));
+    sort_merged_file->SetScanInputReader(new ScanInputReader(this->input_buffer_capacity));
+    next_level->AddSSTFile(sort_merged_file);
 
-            // generate the new SST number
-            int new_sst_num = (current_level + 1) * SIZE_RATIO;
-            new_sst_num += levels[current_level + 1].sst_list.size();
+    // Sort-merge data
+    int fd1 = Utils::OpenFile(this->sst_files[0]->GetFileName());
+    if (fd1 == -1) {
+        return;
+    }
 
-            // check if we are at the last level
-            // this is used for the merge function to know whether to delete tombstones
-            levels[current_level].compact(db_path, new_sst_num, is_last_level);
-            // note that now the level itself contains the compacted SST
-            //  we now manually move it to the next level
-            levels[current_level + 1].sst_list.push_back(levels[current_level].sst_list[0]);
-            // clear the current level
-            levels[current_level].sst_list.clear();
-            // move on to the next level
-            current_level++;
+    int fd2 = Utils::OpenFile(this->sst_files[1]->GetFileName());
+    if (fd2 == -1) {
+        return;
+    }
+
+    // InputReader will read 1 page of data from files at a time
+    InputReader *sst1_reader = this->sst_files[0]->GetInputReader();
+    sst1_reader->ObtainOffsetToRead(fd1);
+    InputReader *sst2_reader = this->sst_files[1]->GetInputReader();
+    sst2_reader->ObtainOffsetToRead(fd2);
+
+    // Consider the output buffer size to be this->buffer_capacity page
+    auto *output_writer = new OutputWriter(sort_merged_file, this->output_buffer_capacity);
+
+    sst1_reader->ReadDataPagesInBuffer(fd1);
+    sst2_reader->ReadDataPagesInBuffer(fd2);
+    int index1 = 0;
+    int index2 = 0;
+    while (sst1_reader->GetInputBufferSize() && sst2_reader->GetInputBufferSize()) {
+        DataEntry_t entry1 = sst1_reader->GetEntry(index1);
+        DataEntry_t entry2 = sst2_reader->GetEntry(index2);
+        if (entry1.first < entry2.first) {
+            output_writer->AddToOutputBuffer(entry1);
+            bloom_filter->InsertKey(entry1.first);
+            index1 += 2;
+        } else if (entry2.first < entry1.first) {
+            output_writer->AddToOutputBuffer(entry2);
+            bloom_filter->InsertKey(entry2.first);
+            index2 += 2;
         } else {
-            // if there is no need to compact, then there's no need to keep going
-            // through the levels to check for compaction we stop
-            return;
+            // It is an update/delete
+            output_writer->AddToOutputBuffer(entry2);
+            bloom_filter->InsertKey(entry2.first);
+            index1 += 2;
+            index2 += 2;
+        }
+
+        if (index1 >= sst1_reader->GetInputBufferSize()) {
+            sst1_reader->ReadDataPagesInBuffer(fd1);
+            index1 = 0;
+        }
+        if (index2 >= sst2_reader->GetInputBufferSize()) {
+            sst2_reader->ReadDataPagesInBuffer(fd2);
+            index2 = 0;
         }
     }
-}
 
-void Level::load_into_lsm_tree(std::vector<Level>& levels, std::filesystem::path sst_path) {
-    int sst_num = extract_number_from_filename(sst_path);
-    // because the SST numbers are static, we can use them to infer the
-    // structure of the LSM tree
-    int level = sst_num / SIZE_RATIO;
-    while ((int)levels.size() <= level) {
-        add_new_level(levels);
+    // Write all the elements of the dataBuffer that still has remaining data to the output buffer
+    if (sst1_reader->GetInputBufferSize()) {
+        WriteRemainingData(fd1, index1, bloom_filter, sst1_reader, output_writer);
+    } else if (sst2_reader->GetInputBufferSize()) {
+        WriteRemainingData(fd2, index2, bloom_filter, sst2_reader, output_writer);
     }
-    levels[level].sst_list.push_back(sst_path);
+
+    int num_pages_written_to_file = output_writer->WriteEndOfFile();
+    // We now have the exact number of pages of data that we wrote
+    // to the B-tree's leaf level, so update the file's data size.
+    sort_merged_file->SetFileDataSize(num_pages_written_to_file * SST::KV_PAIRS_PER_PAGE * SST::KV_PAIR_BYTE_SIZE);
+
+    // Close files
+    close(fd1);
+    close(fd2);
+
+    // Empty this level.
+    Level::DeleteSSTFiles();
 }
 
-void Level::add_new_level(std::vector<Level>& levels) {
-    Level new_level;
-    levels.push_back(new_level);
+void Level::AddSSTFile(SST *sst_file) { this->sst_files.push_back(sst_file); }
+
+std::vector<SST *> Level::GetSSTFiles() { return this->sst_files; }
+
+void Level::DeleteSSTFiles() {
+    for (auto sst_file : this->sst_files) {
+        std::filesystem::remove(sst_file->GetFileName());
+    }
+    this->sst_files = {};
 }

@@ -1,14 +1,30 @@
-load("//:defs.bzl", "create_cc_tests")
+cc_library(
+    name="test_base",
+    srcs=["test_base.h"],
+    copts = ["-std=c++17"],
+    visibility=["//:test_pkgs"],
+)
 
-test_names = [
-    "avl_tree_test",
-    "bloom_filter_test",
-    "btree_test",
-    "bucket_test",
-    "buffer_pool_test",
-    "extensible_hashtable_test",
-    "kv_store_test",
-    "lru_test",
-]
+cc_library(
+    name="test_targets",
+    # srcs=glob(["*.cpp"]), # error
+    hdrs=glob(["*.cpp"]),
+    includes=["../include"],
+    copts = ["-std=c++17"],
+    deps=[
+        "//src:kv_store_lib",
+        "//include:headers",
+        ":test_base",
+    ],
+    visibility=["//:test_pkgs"],
+)
 
-create_cc_tests(test_names=test_names)
+cc_test(
+    name="test_runner",
+    srcs=["test_runner.cpp"],
+    copts = ["-std=c++17"],
+    deps=[
+        "//tests:test_targets"
+    ],
+    visibility=["//visibility:private"],
+)

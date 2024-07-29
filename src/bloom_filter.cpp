@@ -1,33 +1,70 @@
-#include "bloom_filter.hpp"
+#include "bloom_filter.h"
 
 #include <cmath>
 #include <string>
 
-#include "xxhash.h"
-
-BloomFilter::BloomFilter(int m, int num_entries) {
-    this->total_bits = m * num_entries >= MAX_BITMAP_SIZE ? MAX_BITMAP_SIZE : m * num_entries;
-    for (int i = 0; i < total_bits; i++) {
-        this->bitmap[i] = 0;
-    }
-    // compute optimal number of hash functions
-    this->hash_functions = std::round(std::log(2) * m);
+BloomFilter::BloomFilter(int bits_per_entry, int num_keys) {
+    this->array_bit_size = (bits_per_entry * num_keys) + ((bits_per_entry * num_keys) % Utils::EIGHT_BYTE_SIZE);
+    this->array_size = this->array_bit_size / Utils::EIGHT_BYTE_SIZE;
+    this->array.resize(this->array_size);
+    std::fill(this->array.begin(), this->array.begin(), 0);
+    this->num_hash_functions = std::ceil(log(2) * bits_per_entry);
 }
 
-void BloomFilter::insert(uint32_t key) {
-    // we simulate different hash functions by choosing a different seed for each one
-    for (int i = 0; i < this->hash_functions; i++) {
-        this->bitmap[this->hash(key, i)] = 1;
+uint64_t BloomFilter::GetIndexInBitArray(uint64_t key, uint64_t seed, uint64_t array_bit_size) {
+    std::string key_string = std::to_string(key);
+    void *const buffer = (void *const)key_string.c_str();
+    uint64_t hash = XXH64(buffer, key_string.size(), seed);
+    uint64_t index = hash % array_bit_size;
+    return index;
+}
+
+int BloomFilter::GetIndexInFilterArray(uint64_t index) { return std::ceil(index / Utils::EIGHT_BYTE_SIZE); }
+
+uint64_t BloomFilter::GetShiftedLocationInBitArray(uint64_t index) {
+    return 1 << (Utils::EIGHT_BYTE_SIZE - (index % Utils::EIGHT_BYTE_SIZE) - 1);
+}
+
+void BloomFilter::InsertKey(uint64_t key) {
+    // Insert this key in the array by hashing it
+    // num_hash_functions times to different indexes of array.
+    for (int seed = 1; seed <= this->num_hash_functions; seed += this->num_hash_functions) {
+        uint64_t index = GetIndexInBitArray(key, seed, this->array_bit_size);
+        int i = GetIndexInFilterArray(index);
+        uint64_t target = this->array[i];
+
+        // Set i-th bit (from MSB) of the target to be 1.
+        target = target | GetShiftedLocationInBitArray(index);
+        this->array[i] = target;
     }
 }
 
-bool BloomFilter::get(uint32_t key) {
-    for (int i = 0; i < this->hash_functions; i++) {
-        if (this->bitmap[this->hash(key, i)] == 0) {
+void BloomFilter::InsertKeys(std::vector<DataEntry_t> &data) {
+    for (auto pair : data) {
+        uint64_t key = pair.first;
+        BloomFilter::InsertKey(key);
+    }
+}
+
+bool BloomFilter::KeyProbablyExists(uint64_t key, std::vector<uint64_t> filter_array) const {
+    for (int seed = 1; seed <= this->num_hash_functions; seed += this->num_hash_functions) {
+        uint64_t index = GetIndexInBitArray(key, seed, this->array_bit_size);
+        int i = GetIndexInFilterArray(index);
+        uint64_t target = filter_array[i];
+
+        // check if the i-th bit (from MSB) of the target is set or not.
+        target = target & GetShiftedLocationInBitArray(index);
+        if (!target) {
             return false;
         }
     }
     return true;
 }
 
-int BloomFilter::hash(uint32_t key, int seed) { return XXH64(&key, sizeof(uint32_t), seed) % this->total_bits; }
+std::vector<uint64_t> BloomFilter::GetFilterArray() { return this->array; }
+
+uint64_t BloomFilter::GetFilterArraySize() const { return this->array_size; }
+
+void BloomFilter::ClearFilterArray() { this->array.clear(); }
+
+int BloomFilter::GetNumHashFunctions() const { return this->num_hash_functions; }
