@@ -11,8 +11,8 @@
  */
 class LRU : public EvictionPolicy {
    private:
-    EvictionQueueNode *evictionQueueHead;
-    EvictionQueueNode *mostRecent;
+    EvictionQueueNode *eviction_queue_head;
+    EvictionQueueNode *most_recent;
 
    public:
     LRU();
@@ -25,7 +25,7 @@ class LRU : public EvictionPolicy {
 
     void Insert(Page *page) override;
 
-    void UpdatePageAccessStatus(Page *accessedPage) override;
+    void UpdatePageAccessStatus(Page *accessed_page) override;
 
     Page *GetPageToEvict() override;
 

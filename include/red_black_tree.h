@@ -1,5 +1,5 @@
-#ifndef REDBLACKTREE_H
-#define REDBLACKTREE_H
+#ifndef RED_BLACK_TREE_H
+#define RED_BLACK_TREE_H
 
 #include <limits>
 #include <utility>
@@ -13,23 +13,22 @@
  */
 class RedBlackTree {
    private:
-    /* data */
     Node *root;
-    int currentSize;
+    int current_size;
     uint64_t maxKey;
-    uint64_t minKey;
+    uint64_t min_key;
 
     void RotateRight(Node *node);
 
     void RotateLeft(Node *node);
 
-    void ConnectParentWithNewChild(Node *parent, Node *oldChild, Node *newChild);
+    void ConnectParentWithNewChild(Node *parent, Node *old_child, Node *new_child);
 
     void MaintainRedBlackTreePropertiesAfterInsert(Node *node);
 
     void SetRoot(Node *root);
 
-    static void Visit(Node *node, std::vector<DataEntry_t> &nodesList);
+    static void Visit(Node *node, std::vector<DataEntry_t> &nodes_list);
 
    public:
     explicit RedBlackTree(Node *root = nullptr);
@@ -79,9 +78,9 @@ class RedBlackTree {
      * @param node the root of the tree.
      * @param key1 the lower bound of the scan range.
      * @param key2 the upper bound of the scan range.
-     * @param nodesList the vector to place resulting key-value pairs in.
+     * @param nodes_list the vector to place resulting key-value pairs in.
      */
-    static void InorderTraversal(Node *node, uint64_t key1, uint64_t key2, std::vector<DataEntry_t> &nodesList);
+    static void InorderTraversal(Node *node, uint64_t key1, uint64_t key2, std::vector<DataEntry_t> &nodes_list);
 };
 
-#endif  // REDBLACKTREE_H
+#endif  // RED_BLACK_TREE_H

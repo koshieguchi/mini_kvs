@@ -21,9 +21,9 @@ class EvictionQueueNode {
 
     EvictionQueueNode *GetPrev() { return this->prev; }
 
-    void SetNext(EvictionQueueNode *newNext) { this->next = newNext; }
+    void SetNext(EvictionQueueNode *new_next) { this->next = new_next; }
 
-    void SetPrev(EvictionQueueNode *newPrev) { this->prev = newPrev; }
+    void SetPrev(EvictionQueueNode *new_prev) { this->prev = new_prev; }
 };
 
 #endif  // EvictionQueueNode_H

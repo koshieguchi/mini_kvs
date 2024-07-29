@@ -1,5 +1,5 @@
-#ifndef OUTPUTWRITER_H
-#define OUTPUTWRITER_H
+#ifndef OUTPUT_WRITER_H
+#define OUTPUT_WRITER_H
 
 #include <fstream>
 #include <vector>
@@ -12,21 +12,21 @@
  */
 class OutputWriter {
    private:
-    SST *sstFile;
+    SST *sst_file;
     // Number of pages that output buffer hold in memory before writing it to storage
-    int bufferCapacity;
-    std::vector<DataEntry_t> outputBuffer;
+    int buffer_capacity;
+    std::vector<DataEntry_t> output_buffer;
     std::ofstream file;
-    int numPagesWrittenToFile;
+    int num_pages_written_to_file;
 
    public:
     /**
      * Constructor for a OutputWrite object.
      *
-     * @param sstFile the SST file the buffer is associated with.
+     * @param sst_file the SST file the buffer is associated with.
      * @param capacity the capacity of the buffer (in number of pages).
      */
-    OutputWriter(SST *sstFile, int capacity);
+    OutputWriter(SST *sst_file, int capacity);
 
     /**
      * Add a new key-value entry into the buffer. Write to file if the buffer is full.
@@ -43,4 +43,4 @@ class OutputWriter {
     int WriteEndOfFile();
 };
 
-#endif  // OUTPUTWRITER_H
+#endif  // OUTPUT_WRITER_H

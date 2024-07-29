@@ -20,7 +20,7 @@ class Clock : public EvictionPolicy {
 
     void Insert(Page *page) override;
 
-    void UpdatePageAccessStatus(Page *accessedPage) override;
+    void UpdatePageAccessStatus(Page *accessed_page) override;
 
     Page *GetPageToEvict() override;
 };

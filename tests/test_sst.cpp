@@ -8,9 +8,9 @@ class TestSST : public TestBase {
     static bool TestWriteFile() {
         std::string filename = Utils::GetFilenameWithExt("test");
         std::vector<DataEntry_t> dataToWrite = {std::make_pair(1, 2), std::make_pair(2, 3)};
-        SST *sstFile = new SST(filename, dataToWrite.size() * SST::KV_PAIR_BYTE_SIZE);
-        std::ofstream file(sstFile->GetFileName(), std::ios::out | std::ios::binary);
-        sstFile->WriteFile(file, dataToWrite, SearchType::BINARY_SEARCH, true);
+        SST *sst_file = new SST(filename, dataToWrite.size() * SST::KV_PAIR_BYTE_SIZE);
+        std::ofstream file(sst_file->GetFileName(), std::ios::out | std::ios::binary);
+        sst_file->WriteFile(file, dataToWrite, SearchType::BINARY_SEARCH, true);
 
         std::ifstream inputFile(filename);
         bool result = inputFile.good();
@@ -28,9 +28,9 @@ class TestSST : public TestBase {
             std::make_pair(1, 2), std::make_pair(2, 3), std::make_pair(3, 3),
             std::make_pair(4, 3), std::make_pair(5, 3),
         };
-        SST *sstFile = new SST(filename, dataToWrite.size() * SST::KV_PAIR_BYTE_SIZE);
-        std::ofstream file(sstFile->GetFileName(), std::ios::out | std::ios::binary);
-        sstFile->WriteFile(file, dataToWrite, SearchType::BINARY_SEARCH, true);
+        SST *sst_file = new SST(filename, dataToWrite.size() * SST::KV_PAIR_BYTE_SIZE);
+        std::ofstream file(sst_file->GetFileName(), std::ios::out | std::ios::binary);
+        sst_file->WriteFile(file, dataToWrite, SearchType::BINARY_SEARCH, true);
 
         // Perform action
         std::ifstream inputStream(filename, std::ifstream::binary);
@@ -60,19 +60,19 @@ class TestSST : public TestBase {
         for (int i = 0; i < 3 * SST::KV_PAIRS_PER_PAGE; i++) {
             dataToWrite.emplace_back(i, i + 10);
         }
-        SST *sstFile = new SST(filename, dataToWrite.size() * SST::KV_PAIR_BYTE_SIZE);
-        std::ofstream file(sstFile->GetFileName(), std::ios::out | std::ios::binary);
-        sstFile->WriteFile(file, dataToWrite, SearchType::BINARY_SEARCH, true);
+        SST *sst_file = new SST(filename, dataToWrite.size() * SST::KV_PAIR_BYTE_SIZE);
+        std::ofstream file(sst_file->GetFileName(), std::ios::out | std::ios::binary);
+        sst_file->WriteFile(file, dataToWrite, SearchType::BINARY_SEARCH, true);
 
         // Tests
         bool result = true;
         for (int i = 0; i < 3 * SST::KV_PAIRS_PER_PAGE; i++) {
-            uint64_t value = sstFile->PerformBinarySearch(i, nullptr);
+            uint64_t value = sst_file->PerformBinarySearch(i, nullptr);
             result &= value == i + 10;
         }
 
         // search non-existing key
-        uint64_t value = sstFile->PerformBinarySearch(3 * SST::KV_PAIRS_PER_PAGE + 10, nullptr);
+        uint64_t value = sst_file->PerformBinarySearch(3 * SST::KV_PAIRS_PER_PAGE + 10, nullptr);
         result &= value == Utils::INVALID_VALUE;
 
         // Clean up
@@ -88,21 +88,21 @@ class TestSST : public TestBase {
         for (int i = 0; i < 10; i++) {
             dataToWrite.emplace_back(i, i + 10);
         }
-        SST *sstFile = new SST(filename, dataToWrite.size() * SST::KV_PAIR_BYTE_SIZE);
-        std::ofstream file(sstFile->GetFileName(), std::ios::out | std::ios::binary);
-        sstFile->WriteFile(file, dataToWrite, SearchType::BINARY_SEARCH, true);
+        SST *sst_file = new SST(filename, dataToWrite.size() * SST::KV_PAIR_BYTE_SIZE);
+        std::ofstream file(sst_file->GetFileName(), std::ios::out | std::ios::binary);
+        sst_file->WriteFile(file, dataToWrite, SearchType::BINARY_SEARCH, true);
 
         // Tests
         bool result = true;
 
         // search existing keys
         for (int i = 0; i < 10; i++) {
-            uint64_t value = sstFile->PerformBinarySearch(i, nullptr);
+            uint64_t value = sst_file->PerformBinarySearch(i, nullptr);
             result &= value == i + 10;
         }
 
         // search non-existing key
-        uint64_t value = sstFile->PerformBinarySearch(20, nullptr);
+        uint64_t value = sst_file->PerformBinarySearch(20, nullptr);
         result &= value == Utils::INVALID_VALUE;
 
         // Clean up
@@ -120,16 +120,16 @@ class TestSST : public TestBase {
         for (int i = 0; i < 2 * SST::KV_PAIRS_PER_PAGE; i += 2) {
             dataToWrite.emplace_back(i, i + 10);
         }
-        SST *sstFile = new SST(filename, dataToWrite.size() * SST::KV_PAIR_BYTE_SIZE);
-        std::ofstream file(sstFile->GetFileName(), std::ios::out | std::ios::binary);
-        sstFile->WriteFile(file, dataToWrite, SearchType::BINARY_SEARCH, true);
+        SST *sst_file = new SST(filename, dataToWrite.size() * SST::KV_PAIR_BYTE_SIZE);
+        std::ofstream file(sst_file->GetFileName(), std::ios::out | std::ios::binary);
+        sst_file->WriteFile(file, dataToWrite, SearchType::BINARY_SEARCH, true);
 
         // Tests
         bool result = true;
 
         // Search for odd valued keys
         for (int i = 1; i < 2 * SST::KV_PAIRS_PER_PAGE; i += 2) {
-            uint64_t value = sstFile->PerformBinarySearch(i, nullptr);
+            uint64_t value = sst_file->PerformBinarySearch(i, nullptr);
             result &= value == Utils::INVALID_VALUE;
         }
 
@@ -147,16 +147,16 @@ class TestSST : public TestBase {
         for (int i = 10; i < numEntries + 10; i++) {
             dataToWrite.emplace_back(i, i + 10);
         }
-        SST *sstFile = new SST(filename, dataToWrite.size() * SST::KV_PAIR_BYTE_SIZE);
-        std::ofstream file(sstFile->GetFileName(), std::ios::out | std::ios::binary);
-        sstFile->WriteFile(file, dataToWrite, SearchType::BINARY_SEARCH, true);
+        SST *sst_file = new SST(filename, dataToWrite.size() * SST::KV_PAIR_BYTE_SIZE);
+        std::ofstream file(sst_file->GetFileName(), std::ios::out | std::ios::binary);
+        sst_file->WriteFile(file, dataToWrite, SearchType::BINARY_SEARCH, true);
 
         // Tests
         bool result = true;
 
         // test scanning all data
         std::vector<DataEntry_t> dataScanned;
-        sstFile->PerformBinaryScan(10, numEntries + 10, dataScanned);
+        sst_file->PerformBinaryScan(10, numEntries + 10, dataScanned);
         result &= dataScanned.size() == numEntries;
         for (uint64_t i = 10; i < numEntries + 10; i++) {
             result &= std::find(dataScanned.begin(), dataScanned.end(), std::make_pair(i, i + 10)) != dataScanned.end();
@@ -166,7 +166,7 @@ class TestSST : public TestBase {
         dataScanned.clear();
         uint64_t key1 = SST::KV_PAIRS_PER_PAGE + 100;
         uint64_t key2 = 2 * SST::KV_PAIRS_PER_PAGE - 1;
-        sstFile->PerformBinaryScan(key1, key2, dataScanned);
+        sst_file->PerformBinaryScan(key1, key2, dataScanned);
         result &= dataScanned.size() == key2 - key1 + 1;
         uint64_t expectedScannedKeysSum = (key2 * (key2 + 1) / 2) - ((key1 - 1) * key1 / 2);
         uint64_t scannedKeysSum = 0;
@@ -178,7 +178,7 @@ class TestSST : public TestBase {
 
         // test scanning with keys not in data
         dataScanned.clear();
-        sstFile->PerformBinaryScan(0, numEntries + 20, dataScanned);
+        sst_file->PerformBinaryScan(0, numEntries + 20, dataScanned);
         result &= dataScanned.size() == numEntries;
         for (uint64_t i = 10; i < numEntries + 10; i++) {
             result &= std::find(dataScanned.begin(), dataScanned.end(), std::make_pair(i, i + 10)) != dataScanned.end();
@@ -198,16 +198,16 @@ class TestSST : public TestBase {
         for (int i = 0; i < numEntries; i++) {
             dataToWrite.emplace_back(i, i + 10);
         }
-        SST *sstFile = new SST(filename, dataToWrite.size() * SST::KV_PAIR_BYTE_SIZE);
-        std::ofstream file(sstFile->GetFileName(), std::ios::out | std::ios::binary);
-        sstFile->WriteFile(file, dataToWrite, SearchType::BINARY_SEARCH, true);
+        SST *sst_file = new SST(filename, dataToWrite.size() * SST::KV_PAIR_BYTE_SIZE);
+        std::ofstream file(sst_file->GetFileName(), std::ios::out | std::ios::binary);
+        sst_file->WriteFile(file, dataToWrite, SearchType::BINARY_SEARCH, true);
 
         // Tests
         bool result = true;
 
         // test scanning all data
         std::vector<DataEntry_t> dataScanned;
-        sstFile->PerformBinaryScan(0, numEntries, dataScanned);
+        sst_file->PerformBinaryScan(0, numEntries, dataScanned);
         result &= dataScanned.size() == numEntries;
         for (uint64_t i = 0; i < numEntries; i++) {
             result &= std::find(dataScanned.begin(), dataScanned.end(), std::make_pair(i, i + 10)) != dataScanned.end();
@@ -215,7 +215,7 @@ class TestSST : public TestBase {
 
         // test scanning part of data
         dataScanned.clear();
-        sstFile->PerformBinaryScan(10, 19, dataScanned);
+        sst_file->PerformBinaryScan(10, 19, dataScanned);
         result &= dataScanned.size() == 10;
         for (uint64_t i = 10; i < 20; i++) {
             result &= std::find(dataScanned.begin(), dataScanned.end(), std::make_pair(i, i + 10)) != dataScanned.end();

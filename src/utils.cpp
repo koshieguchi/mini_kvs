@@ -4,15 +4,15 @@
 
 namespace Utils {
 
-int BinarySearch(std::vector<uint64_t> keys, uint64_t key, int startIndex) {
-    if (key == keys[startIndex]) {
-        return startIndex;
+int BinarySearch(std::vector<uint64_t> keys, uint64_t key, int start_index) {
+    if (key == keys[start_index]) {
+        return start_index;
     } else if (key == keys[keys.size() - 1]) {
         return keys.size() - 1;
     }
 
     // Do a binary search
-    int start = startIndex;
+    int start = start_index;
     int end = keys.size() - 1;
     while (start <= end) {
         int mid = start + (end - start) / 2;
@@ -30,12 +30,12 @@ int BinarySearch(std::vector<uint64_t> keys, uint64_t key, int startIndex) {
     return start;
 }
 
-std::string GetBinaryFromInt(uint64_t integer, int numBits) {
+std::string GetBinaryFromInt(uint64_t integer, int num_bits) {
     std::string result = std::bitset<64>(integer).to_string();
-    return result.substr(result.length() - numBits);
+    return result.substr(result.length() - num_bits);
 }
 
-std::string GetFilenameWithExt(const std::string &fileName) { return fileName + Utils::SST_FILE_EXTENSION; }
+std::string GetFilenameWithExt(const std::string &file_name) { return file_name + Utils::SST_FILE_EXTENSION; }
 
 std::vector<uint64_t> GetKeys(std::vector<uint64_t> &data) {
     std::vector<uint64_t> keys;
@@ -45,9 +45,9 @@ std::vector<uint64_t> GetKeys(std::vector<uint64_t> &data) {
     return keys;
 }
 
-int OpenFile(const std::string &fileName) {
-    int fd = open(fileName.c_str(), O_RDONLY);  // Remove O_DIRECT flag when debugging
-    // int fd = open(fileName.c_str(), O_RDONLY | O_DIRECT); // Remove O_DIRECT flag when debugging
+int OpenFile(const std::string &file_name) {
+    int fd = open(file_name.c_str(), O_RDONLY);  // Remove O_DIRECT flag when debugging
+    // int fd = open(file_name.c_str(), O_RDONLY | O_DIRECT); // Remove O_DIRECT flag when debugging
     if (fd == -1) {
         perror("fd");
     }

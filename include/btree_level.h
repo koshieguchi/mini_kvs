@@ -1,5 +1,5 @@
-#ifndef BTREELEVEL_H
-#define BTREELEVEL_H
+#ifndef BTREE_LEVEL_H
+#define BTREE_LEVEL_H
 
 #include <vector>
 
@@ -8,18 +8,17 @@
  */
 class BTreeLevel {
    private:
-    /* data */
-    uint64_t startingByteOffset;
-    uint64_t nextByteOffsetToWrite;
+    uint64_t starting_byte_offset;
+    uint64_t next_byte_offset_to_write;
     std::vector<uint64_t> data;
 
    public:
-    explicit BTreeLevel(uint64_t startingByteOffset) {
-        this->startingByteOffset = startingByteOffset;
-        this->nextByteOffsetToWrite = startingByteOffset;
+    explicit BTreeLevel(uint64_t starting_byte_offset) {
+        this->starting_byte_offset = starting_byte_offset;
+        this->next_byte_offset_to_write = starting_byte_offset;
     }
 
-    [[nodiscard]] uint64_t GetStartingByteOffset() const { return this->startingByteOffset; }
+    [[nodiscard]] uint64_t GetStartingByteOffset() const { return this->starting_byte_offset; }
 
     void AddDataToLevel(uint64_t key) { this->data.push_back(key); }
 
@@ -27,9 +26,9 @@ class BTreeLevel {
 
     void ClearLevel() { this->data.clear(); }
 
-    [[nodiscard]] uint64_t GetNextByteOffsetToWrite() const { return this->nextByteOffsetToWrite; }
+    [[nodiscard]] uint64_t GetNextByteOffsetToWrite() const { return this->next_byte_offset_to_write; }
 
-    void IncrementNextByteOffsetToWrite(uint64_t bytes) { this->nextByteOffsetToWrite += bytes; }
+    void IncrementNextByteOffsetToWrite(uint64_t bytes) { this->next_byte_offset_to_write += bytes; }
 };
 
-#endif  // BTREELEVEL_H
+#endif  // BTREE_LEVEL_H

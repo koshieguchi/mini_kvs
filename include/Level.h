@@ -15,12 +15,12 @@
 class Level {
    private:
     int level;
-    int bloomFilterBitsPerEntry;
-    std::vector<SST *> sstFiles;
-    int inputBufferCapacity;
-    int outputBufferCapacity;
+    int bloom_filter_bits_per_entry;
+    std::vector<SST *> sst_files;
+    int input_buffer_capacity;
+    int output_buffer_capacity;
 
-    void AddSSTFile(SST *sstFile);
+    void AddSSTFile(SST *sst_file);
 
     void DeleteSSTFiles();
 
@@ -29,11 +29,11 @@ class Level {
      * Constructor for a Level object.
      *
      * @param level the number of level it exists in the LSM-Tree.
-     * @param bloomFilterBitsPerEntry the number of bits per entry for bloom filter.
-     * @param inputBufferCapacity the capacity of input buffer in number of pages.
-     * @param outputBufferCapacity the capacity of output buffer in number of pages.
+     * @param bloom_filter_bits_per_entry the number of bits per entry for bloom filter.
+     * @param input_buffer_capacity the capacity of input buffer in number of pages.
+     * @param output_buffer_capacity the capacity of output buffer in number of pages.
      */
-    Level(int level, int bloomFilterBitsPerEntry, int inputBufferCapacity, int outputBufferCapacity);
+    Level(int level, int bloom_filter_bits_per_entry, int input_buffer_capacity, int output_buffer_capacity);
 
     // destructor
     ~Level();
@@ -44,18 +44,18 @@ class Level {
      * Write KV-pair data into current LSM-Tree level.
      *
      * @param data the KV-pair data.
-     * @param searchType the search type used by KVS (binary search or B-Tree search)
-     * @param kvsPath the path to the KVS file storage.
+     * @param search_type the search type used by KVS (binary search or B-Tree search)
+     * @param kvs_path the path to the KVS file storage.
      */
-    void WriteDataToLevel(std::vector<DataEntry_t> data, SearchType searchType, std::string &kvsPath);
+    void WriteDataToLevel(std::vector<DataEntry_t> data, SearchType search_type, std::string &kvs_path);
 
     /**
      * Merge sort with the SST file at current level
      *
-     * @param nextLevel the level in which sort-merged data will be written into
-     * @param kvsPath the path to the KVS file storage.
+     * @param next_level the level in which sort-merged data will be written into
+     * @param kvs_path the path to the KVS file storage.
      */
-    void SortMergeAndWriteToNextLevel(Level *nextLevel, std::string &kvsPath);
+    void SortMergeAndWriteToNextLevel(Level *next_level, std::string &kvs_path);
 
     /**
      * Get all the SST file objects within current LSM-Tree level.

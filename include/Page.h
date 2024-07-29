@@ -17,31 +17,31 @@ class EvictionQueueNode;
  */
 class Page {
    private:
-    std::string pageId;
+    std::string page_id;
     std::vector<uint64_t> data;
-    EvictionQueueNode *evictionNode;  // Used in LRU
-    bool accessBit;                   // Used in Clock
+    EvictionQueueNode *eviction_node;  // Used in LRU
+    bool accessBit;                    // Used in Clock
    public:
     /**
      * Constructor for a Page object
      *
-     * @param pageId the ID of the page.
+     * @param page_id the ID of the page.
      * @param data the key-value data stored in the page.
-     * @param evictionNode the eviction queue linked list node. Used for LRU eviction policy.
+     * @param eviction_node the eviction queue linked list node. Used for LRU eviction policy.
      */
-    Page(const std::string &pageId, std::vector<uint64_t> data, EvictionQueueNode *evictionNode = nullptr) {
-        this->pageId = pageId;
+    Page(const std::string &page_id, std::vector<uint64_t> data, EvictionQueueNode *eviction_node = nullptr) {
+        this->page_id = page_id;
         this->data = std::move(data);
-        this->evictionNode = evictionNode;
+        this->eviction_node = eviction_node;
         this->accessBit = false;
     }
 
-    ~Page() { delete this->evictionNode; }
+    ~Page() { delete this->eviction_node; }
 
     /**
      * Get the ID of the current page.
      */
-    std::string GetPageId() { return this->pageId; }
+    std::string GetPageId() { return this->page_id; }
 
     /**
      * Get the access bit of the page. Used for CLOCK eviction policy.
@@ -51,12 +51,12 @@ class Page {
     /**
      * Get the eviction queue linked list node of the page. Used for LRU eviction policy.
      */
-    EvictionQueueNode *GetEvictionQueueNode() { return this->evictionNode; }
+    EvictionQueueNode *GetEvictionQueueNode() { return this->eviction_node; }
 
     /**
      * Set the eviction queue linked list node of the page. Used for LRU eviction policy.
      */
-    void SetEvictionQueueNode(EvictionQueueNode *newEvictionNode) { this->evictionNode = newEvictionNode; }
+    void SetEvictionQueueNode(EvictionQueueNode *new_eviction_node) { this->eviction_node = new_eviction_node; }
 
     /**
      * Set the access bit of the page. Used for CLOCK eviction policy.

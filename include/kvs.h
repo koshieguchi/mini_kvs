@@ -17,23 +17,24 @@
 class KVS {
    private:
     Memtable *memtable;
-    std::string kvsPath;
-    std::vector<SST *> allSSTs;
-    BufferPool *bufferPool;
-    SearchType searchType;
-    bool isLSMTree;
-    LSMTree *lsmTree;
+    std::string kvs_path;
+    std::vector<SST *> all_ssts;
+    BufferPool *buffer_pool;
+    SearchType search_type;
+    bool is_lsm_tree;
+    LSMTree *lsm_tree;
 
    public:
     /**
      * Creates a new KVS object with given search type.
      *
-     * @param memtableSize the maximum size of the memtable.
-     * @param searchType the search type of SST files.
-     * @param bufferPool the buffer pool of the KVS.
-     * @param lsmTree the LSM-Tree data structure for the KVS.
+     * @param memtable_size the maximum size of the memtable.
+     * @param search_type the search type of SST files.
+     * @param buffer_pool the buffer pool of the KVS.
+     * @param lsm_tree the LSM-Tree data structure for the KVS.
      */
-    explicit KVS(int memtableSize, SearchType searchType, BufferPool *bufferPool = nullptr, LSMTree *lsmTree = nullptr);
+    explicit KVS(int memtable_size, SearchType search_type, BufferPool *buffer_pool = nullptr,
+                 LSMTree *lsm_tree = nullptr);
 
     ~KVS();
 
@@ -71,9 +72,9 @@ class KVS {
      * Only available if database is initialized using LSMTree data structure.
      *
      * @param key
-     * @param newValue
+     * @param new_value
      */
-    void Update(uint64_t key, uint64_t newValue);
+    void Update(uint64_t key, uint64_t new_value);
 
     /**
      * Deletes an existing key in the database.
@@ -89,9 +90,9 @@ class KVS {
      *
      * @param key1 the lower bound of the scan range.
      * @param key2 the upper bound of the scan range.
-     * @param scanResult in scanResult with list of all keys between key1 and key2.
+     * @param scan_result in scan_result with list of all keys between key1 and key2.
      */
-    void Scan(uint64_t key1, uint64_t key2, std::vector<DataEntry_t> &scanResult);
+    void Scan(uint64_t key1, uint64_t key2, std::vector<DataEntry_t> &scan_result);
 
     /**
      * Resets this kvs's buffer pool by creating a new extendible hashtable with new min size,
@@ -99,11 +100,11 @@ class KVS {
      *
      * This method is used in experiments.
      *
-     * @param bufferPoolMinSize
-     * @param bufferPoolMaxSize
-     * @param evictionPolicyType
+     * @param buffer_pool_min_size
+     * @param buffer_pool_max_size
+     * @param eviction_policy_type
      */
-    void ResetBufferPool(int bufferPoolMinSize, int bufferPoolMaxSize, EvictionPolicyType evictionPolicyType);
+    void ResetBufferPool(int buffer_pool_min_size, int buffer_pool_max_size, EvictionPolicyType eviction_policy_type);
 };
 
 #endif  // KVS_H

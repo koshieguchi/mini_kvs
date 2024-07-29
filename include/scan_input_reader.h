@@ -1,5 +1,5 @@
-#ifndef SACNINPUTREADER_H
-#define SACNINPUTREADER_H
+#ifndef SCAN_INPUT_READER_H
+#define SCAN_INPUT_READER_H
 
 #include <iostream>
 #include <queue>
@@ -13,13 +13,13 @@
  */
 class ScanInputReader {
    private:
-    std::vector<uint64_t> inputBuffer;
-    uint64_t offsetToRead;
-    uint64_t bufferCapacity;
+    std::vector<uint64_t> input_buffer;
+    uint64_t offset_to_read;
+    uint64_t buffer_capacity;
     std::vector<uint64_t> keys;
-    int startIndex;
-    uint64_t endOffsetToScan;
-    bool isScannedCompletely;
+    int start_index;
+    uint64_t end_offset_to_scan;
+    bool is_completely_scanned;
 
     void ReadDataPagesIntoBuffer(int fd);
 
@@ -37,7 +37,7 @@ class ScanInputReader {
 
     [[nodiscard]] bool IsLeavesRangeToScanSet() const;
 
-    void SetLeavesRangeToScan(uint64_t startOffsetToScan, uint64_t endOffsetToScan, int fd);
+    void SetLeavesRangeToScan(uint64_t start_offset_to_scan, uint64_t end_offset_to_scan, int fd);
 
     int GetInputBufferSize();
 
@@ -54,4 +54,4 @@ class ScanInputReader {
     [[nodiscard]] bool IsScannedCompletely() const;
 };
 
-#endif  // SACNINPUTREADER_H
+#endif  // SCAN_INPUT_READER_H

@@ -5,22 +5,22 @@
 
 RedBlackTree::RedBlackTree(Node *root) {
     this->root = root;
-    this->currentSize = 0;
+    this->current_size = 0;
     this->maxKey = 0;
-    this->minKey = std::numeric_limits<uint64_t>::max();
+    this->min_key = std::numeric_limits<uint64_t>::max();
 }
 
 RedBlackTree::~RedBlackTree() { delete this->root; }
 
 Node *RedBlackTree::GetRoot() { return this->root; }
 
-int RedBlackTree::GetCurrentSize() const { return this->currentSize; }
+int RedBlackTree::GetCurrentSize() const { return this->current_size; }
 
 void RedBlackTree::SetRoot(Node *newRoot) { this->root = newRoot; }
 
 uint64_t RedBlackTree::GetMaxKey() const { return this->maxKey; }
 
-uint64_t RedBlackTree::GetMinKey() const { return this->minKey; }
+uint64_t RedBlackTree::GetMinKey() const { return this->min_key; }
 
 uint64_t RedBlackTree::Search(uint64_t key) {
     Node *node = this->root;
@@ -37,53 +37,53 @@ uint64_t RedBlackTree::Search(uint64_t key) {
     return Utils::INVALID_VALUE;
 }
 
-void RedBlackTree::ConnectParentWithNewChild(Node *parent, Node *oldChild, Node *newChild) {
+void RedBlackTree::ConnectParentWithNewChild(Node *parent, Node *old_child, Node *new_child) {
     if (parent == nullptr) {
-        this->SetRoot(newChild);
-    } else if (oldChild == parent->GetRightChild()) {
-        parent->SetRightChild(newChild);
-    } else if (oldChild == parent->GetLeftChild()) {
-        parent->SetLeftChild(newChild);
+        this->SetRoot(new_child);
+    } else if (old_child == parent->GetRightChild()) {
+        parent->SetRightChild(new_child);
+    } else if (old_child == parent->GetLeftChild()) {
+        parent->SetLeftChild(new_child);
     } else {
         std::cout << "The node is not a child of parent." << std::endl;
         return;
     }
 
-    if (newChild != nullptr) {
-        newChild->SetParent(parent);
+    if (new_child != nullptr) {
+        new_child->SetParent(parent);
     }
 }
 
 void RedBlackTree::RotateRight(Node *node) {
     Node *parent = node->GetParent();
-    Node *leftChild = node->GetLeftChild();
+    Node *left_child = node->GetLeftChild();
 
     // Rotate right around the node
-    node->SetLeftChild(leftChild->GetRightChild());
-    if (leftChild->GetRightChild() != nullptr) {
-        leftChild->GetRightChild()->SetParent(node);
+    node->SetLeftChild(left_child->GetRightChild());
+    if (left_child->GetRightChild() != nullptr) {
+        left_child->GetRightChild()->SetParent(node);
     }
 
-    leftChild->SetRightChild(node);
-    node->SetParent(leftChild);
+    left_child->SetRightChild(node);
+    node->SetParent(left_child);
 
-    ConnectParentWithNewChild(parent, node, leftChild);
+    ConnectParentWithNewChild(parent, node, left_child);
 }
 
 void RedBlackTree::RotateLeft(Node *node) {
     Node *parent = node->GetParent();
-    Node *rightChild = node->GetRightChild();
+    Node *right_child = node->GetRightChild();
 
     // Rotate left around the node
-    node->SetRightChild(rightChild->GetLeftChild());
-    if (rightChild->GetLeftChild() != nullptr) {
-        rightChild->GetLeftChild()->SetParent(node);
+    node->SetRightChild(right_child->GetLeftChild());
+    if (right_child->GetLeftChild() != nullptr) {
+        right_child->GetLeftChild()->SetParent(node);
     }
 
-    rightChild->SetLeftChild(node);
-    node->SetParent(rightChild);
+    right_child->SetLeftChild(node);
+    node->SetParent(right_child);
 
-    ConnectParentWithNewChild(parent, node, rightChild);
+    ConnectParentWithNewChild(parent, node, right_child);
 }
 
 void RedBlackTree::Insert(uint64_t key, uint64_t value) {
@@ -102,24 +102,24 @@ void RedBlackTree::Insert(uint64_t key, uint64_t value) {
 
     // At this point the variable parent refers to parent of this new node
     // Color of the new node is red.
-    Node *newNode = new Node(key, value, nullptr, nullptr, parent, RED);
+    Node *new_node = new Node(key, value, nullptr, nullptr, parent, RED);
 
     if (parent == nullptr) {
-        this->root = newNode;
+        this->root = new_node;
     } else if (key > parent->GetKey()) {
-        parent->SetRightChild(newNode);
+        parent->SetRightChild(new_node);
     } else {
-        parent->SetLeftChild(newNode);
+        parent->SetLeftChild(new_node);
     }
 
     // Make sure the properties of Red-Black tree remains satisfied
-    this->MaintainRedBlackTreePropertiesAfterInsert(newNode);
-    this->currentSize++;
+    this->MaintainRedBlackTreePropertiesAfterInsert(new_node);
+    this->current_size++;
     if (key > this->maxKey) {
         this->maxKey = key;
     }
-    if (key < this->minKey) {
-        this->minKey = key;
+    if (key < this->min_key) {
+        this->min_key = key;
     }
 }
 
@@ -139,15 +139,15 @@ void RedBlackTree::MaintainRedBlackTreePropertiesAfterInsert(Node *node) {
         return;
     }
 
-    Node *grandParent = parent->GetParent();
+    Node *grand_parent = parent->GetParent();
     Node *uncle;
-    if (parent == grandParent->GetRightChild()) {
-        uncle = grandParent->GetLeftChild();
-    } else if (parent == grandParent->GetLeftChild()) {
-        uncle = grandParent->GetRightChild();
+    if (parent == grand_parent->GetRightChild()) {
+        uncle = grand_parent->GetLeftChild();
+    } else if (parent == grand_parent->GetLeftChild()) {
+        uncle = grand_parent->GetRightChild();
     } else {
-        // throw an error "parent is not a child of the grandParent"
-        std::cout << "The parent is not a child of the grandParent." << std::endl;
+        // throw an error "parent is not a child of the grand_parent"
+        std::cout << "The parent is not a child of the grand_parent." << std::endl;
         return;
     }
 
@@ -158,13 +158,13 @@ void RedBlackTree::MaintainRedBlackTreePropertiesAfterInsert(Node *node) {
     if (uncle != nullptr && uncle->GetColor() == RED) {
         parent->SetColor(BLACK);
         uncle->SetColor(BLACK);
-        grandParent->SetColor(RED);
+        grand_parent->SetColor(RED);
 
         // The grandparent is now red, but the grand-grandparent can also be red,
-        // in which case we should recursively call this method on the grandParent
+        // in which case we should recursively call this method on the grand_parent
         // to make sure we maintain the property that no two red nodes are located
         // beside each other.
-        MaintainRedBlackTreePropertiesAfterInsert(grandParent);
+        MaintainRedBlackTreePropertiesAfterInsert(grand_parent);
     }
 
     // Case 4: The parent is red, but the uncle is black,
@@ -183,7 +183,7 @@ void RedBlackTree::MaintainRedBlackTreePropertiesAfterInsert(Node *node) {
 
     // The scenarios of cases 4-b and 5 overlap, so we just implement
     // case 4-a and 5 by mixing them as follows:
-    else if (parent == grandParent->GetRightChild()) {
+    else if (parent == grand_parent->GetRightChild()) {
         if (node == parent->GetLeftChild()) {
             // The new node is to the left of the parent,
             // so rotate in the opposite direction which is the right.
@@ -197,10 +197,10 @@ void RedBlackTree::MaintainRedBlackTreePropertiesAfterInsert(Node *node) {
         // Case 5-a: The node refers to a right-right outer child
         // of the grandparent, so we have to do a rotation of
         // opposite direction (i.e. a left rotation) on the grandparent.
-        RotateLeft(grandParent);
+        RotateLeft(grand_parent);
 
-        parent->SetColor(BLACK);     // Black
-        grandParent->SetColor(RED);  // Red
+        parent->SetColor(BLACK);      // Black
+        grand_parent->SetColor(RED);  // Red
     } else {
         // The parent is the left child of the grandparent.
         // The new node is the right child of the parent,
@@ -216,14 +216,14 @@ void RedBlackTree::MaintainRedBlackTreePropertiesAfterInsert(Node *node) {
         // Case 5-a: The node refers to a left-left outer child
         // of the grandparent, so we have to do a rotation of
         // opposite direction (i.e. a right rotation) on the grandparent.
-        RotateRight(grandParent);
+        RotateRight(grand_parent);
 
-        parent->SetColor(BLACK);     // Black
-        grandParent->SetColor(RED);  // Red
+        parent->SetColor(BLACK);      // Black
+        grand_parent->SetColor(RED);  // Red
     }
 }
 
-void RedBlackTree::InorderTraversal(Node *node, uint64_t key1, uint64_t key2, std::vector<DataEntry_t> &nodesList) {
+void RedBlackTree::InorderTraversal(Node *node, uint64_t key1, uint64_t key2, std::vector<DataEntry_t> &nodes_list) {
     // Since the red-black tree is a balanced binary search tree, an inorder
     // traversal of that give us its elements in an ascending sorted order.
     if (node == nullptr) {
@@ -238,22 +238,22 @@ void RedBlackTree::InorderTraversal(Node *node, uint64_t key1, uint64_t key2, st
     // That is because the left subtree of the current node refers to keys smaller
     // than key1, and we do not want them.
     if (node->GetKey() > key1) {
-        InorderTraversal(node->GetLeftChild(), key1, key2, nodesList);
+        InorderTraversal(node->GetLeftChild(), key1, key2, nodes_list);
     }
 
     if (node->GetKey() >= key1 && node->GetKey() <= key2) {
-        RedBlackTree::Visit(node, nodesList);
+        RedBlackTree::Visit(node, nodes_list);
     }
 
     // Only visit the right subtree if the current node's key is less than key2.
     // That is because the right subtree of the current node refers to keys greater
     // than key2, and we do not want them.
     if (node->GetKey() < key2) {
-        InorderTraversal(node->GetRightChild(), key1, key2, nodesList);
+        InorderTraversal(node->GetRightChild(), key1, key2, nodes_list);
     }
 }
 
-void RedBlackTree::Visit(Node *node, std::vector<DataEntry_t> &nodesList) {
+void RedBlackTree::Visit(Node *node, std::vector<DataEntry_t> &nodes_list) {
     DataEntry_t data = std::make_pair(node->GetKey(), node->GetValue());
-    nodesList.push_back(data);
+    nodes_list.push_back(data);
 }

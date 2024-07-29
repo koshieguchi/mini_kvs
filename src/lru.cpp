@@ -1,37 +1,37 @@
 #include "lru.h"
 
 LRU::LRU() {
-    this->evictionQueueHead = nullptr;
-    this->mostRecent = nullptr;
+    this->eviction_queue_head = nullptr;
+    this->most_recent = nullptr;
 }
 
 void LRU::Insert(Page *page) {
-    auto *newNode = new EvictionQueueNode(page, nullptr, nullptr);
-    page->SetEvictionQueueNode(newNode);
+    auto *new_node = new EvictionQueueNode(page, nullptr, nullptr);
+    page->SetEvictionQueueNode(new_node);
 
-    if (this->evictionQueueHead == nullptr) {
-        this->evictionQueueHead = newNode;
-        this->mostRecent = newNode;
+    if (this->eviction_queue_head == nullptr) {
+        this->eviction_queue_head = new_node;
+        this->most_recent = new_node;
         return;
     }
 
-    this->mostRecent->SetNext(newNode);
-    newNode->SetPrev(this->mostRecent);
-    this->mostRecent = newNode;
+    this->most_recent->SetNext(new_node);
+    new_node->SetPrev(this->most_recent);
+    this->most_recent = new_node;
 }
 
 // Update the newly accessed page to be the most recently used page.
-void LRU::UpdatePageAccessStatus(Page *accessedPage) {
-    EvictionQueueNode *accessedNode = accessedPage->GetEvictionQueueNode();
+void LRU::UpdatePageAccessStatus(Page *accessed_page) {
+    EvictionQueueNode *accessed_node = accessed_page->GetEvictionQueueNode();
 
     // No need to do anything the page being accessed is already the most recent
-    if (accessedNode == this->mostRecent) {
+    if (accessed_node == this->most_recent) {
         return;
     }
 
-    // Link prev node to next node:  prev <-> accessedPage <-> next  =>  prev <-> next
-    EvictionQueueNode *prev = accessedNode->GetPrev();
-    EvictionQueueNode *next = accessedNode->GetNext();
+    // Link prev node to next node:  prev <-> accessed_page <-> next  =>  prev <-> next
+    EvictionQueueNode *prev = accessed_node->GetPrev();
+    EvictionQueueNode *next = accessed_node->GetNext();
     if (prev != nullptr) {
         prev->SetNext(next);
     }
@@ -39,33 +39,33 @@ void LRU::UpdatePageAccessStatus(Page *accessedPage) {
         next->SetPrev(prev);
     }
 
-    if (accessedNode == this->evictionQueueHead) {
-        this->evictionQueueHead = next;
+    if (accessed_node == this->eviction_queue_head) {
+        this->eviction_queue_head = next;
     }
 
-    // Put this newly accessed page after the mostRecent
-    if (this->mostRecent != nullptr) {
-        this->mostRecent->SetNext(accessedNode);
+    // Put this newly accessed page after the most_recent
+    if (this->most_recent != nullptr) {
+        this->most_recent->SetNext(accessed_node);
     }
-    accessedNode->SetPrev(this->mostRecent);
-    accessedNode->SetNext(nullptr);
-    this->mostRecent = accessedNode;
+    accessed_node->SetPrev(this->most_recent);
+    accessed_node->SetNext(nullptr);
+    this->most_recent = accessed_node;
 }
 
 // Evict the least recently used page
 Page *LRU::GetPageToEvict() {
-    EvictionQueueNode *targetEvictionNode = this->evictionQueueHead;
+    EvictionQueueNode *target_eviction_node = this->eviction_queue_head;
 
     // Delete the EvictionQueueNode of this page, which is the first node of the queue.
-    EvictionQueueNode *next = targetEvictionNode->GetNext();
+    EvictionQueueNode *next = target_eviction_node->GetNext();
     if (next != nullptr) {
         next->SetPrev(nullptr);
     }
-    this->evictionQueueHead = next;
+    this->eviction_queue_head = next;
 
-    Page *pageToEvict = targetEvictionNode->GetPage();
-    pageToEvict->SetEvictionQueueNode(nullptr);
-    return pageToEvict;
+    Page *page_to_evict = target_eviction_node->GetPage();
+    page_to_evict->SetEvictionQueueNode(nullptr);
+    return page_to_evict;
 }
 
-EvictionQueueNode *LRU::GetQueueHead() { return this->evictionQueueHead; }
+EvictionQueueNode *LRU::GetQueueHead() { return this->eviction_queue_head; }

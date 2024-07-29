@@ -1,5 +1,5 @@
-#ifndef BLOOMFILTER_H
-#define BLOOMFILTER_H
+#ifndef BLOOM_FILTER_H
+#define BLOOM_FILTER_H
 
 #include <vector>
 
@@ -11,23 +11,23 @@
  */
 class BloomFilter {
    private:
-    uint64_t arrayBitSize;
-    uint64_t arraySize;
-    int numHashFunctions;
+    uint64_t array_bit_size;
+    uint64_t array_size;
+    int num_hash_functions;
     std::vector<uint64_t> array;
 
    public:
     /**
      * Constructor for a BloomFilter object.
      *
-     * @param bitsPerEntry the number of bits in filter array used by each entry.
-     * @param numKeys the max number of keys in the bloom filter.
+     * @param bits_per_entry the number of bits in filter array used by each entry.
+     * @param num_keys the max number of keys in the bloom filter.
      */
-    explicit BloomFilter(int bitsPerEntry, int numKeys);
+    explicit BloomFilter(int bits_per_entry, int num_keys);
 
     static int GetIndexInFilterArray(uint64_t index);
 
-    static uint64_t GetIndexInBitArray(uint64_t key, uint64_t seed, uint64_t arrayBitSize);
+    static uint64_t GetIndexInBitArray(uint64_t key, uint64_t seed, uint64_t array_bit_size);
 
     /**
      * Insert a new key into the bloom filter.
@@ -47,10 +47,10 @@ class BloomFilter {
      * Check if key exists in the bloom filter or not. Does not produce false negatives.
      *
      * @param key the key to search for.
-     * @param filterArray the bloom filter array to search through.
+     * @param filter_array the bloom filter array to search through.
      * @return false if the key doesn't exist, true if it probably exist.
      */
-    [[nodiscard]] bool KeyProbablyExists(uint64_t key, std::vector<uint64_t> filterArray) const;
+    [[nodiscard]] bool KeyProbablyExists(uint64_t key, std::vector<uint64_t> filter_array) const;
 
     static uint64_t GetShiftedLocationInBitArray(uint64_t index);
 
@@ -75,4 +75,4 @@ class BloomFilter {
     [[nodiscard]] int GetNumHashFunctions() const;
 };
 
-#endif  // BLOOMFILTER_H
+#endif  // BLOOM_FILTER_H

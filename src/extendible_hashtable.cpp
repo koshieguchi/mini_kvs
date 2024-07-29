@@ -6,113 +6,113 @@
 
 #include "utils.h"
 
-ExtendibleHashtable::ExtendibleHashtable(int minSize, int maxSize, int bucketMaxSize) {
-    // globalDepth always changes between minDepth <= globalDepth <= maxDepth.
-    this->minDepth = std::floor(std::log2(minSize));
-    this->globalDepth = this->minDepth;
-    this->maxDepth = std::floor(std::log2(maxSize));
-    this->bucketMaxSize = bucketMaxSize;
+ExtendibleHashtable::ExtendibleHashtable(int min_size, int max_size, int bucket_max_size) {
+    // global_depth always changes between min_depth <= global_depth <= max_depth.
+    this->min_depth = std::floor(std::log2(min_size));
+    this->global_depth = this->min_depth;
+    this->max_depth = std::floor(std::log2(max_size));
+    this->bucket_max_size = bucket_max_size;
     this->size = 0;
 
-    for (int i = 0; i < 1 << this->globalDepth; i++) {
-        this->buckets.emplace(Utils::GetBinaryFromInt(i, this->minDepth), new Bucket(this->globalDepth));
+    for (int i = 0; i < 1 << this->global_depth; i++) {
+        this->buckets.emplace(Utils::GetBinaryFromInt(i, this->min_depth), new Bucket(this->global_depth));
     }
 }
 
 ExtendibleHashtable::~ExtendibleHashtable() {
     // First gather buckets into set as some directory may point to same bucket
-    std::set<Bucket *> erasedBuckets;
+    std::set<Bucket *> erased_buckets;
     for (auto const &[_, bucket] : this->buckets) {
-        erasedBuckets.insert(bucket);
+        erased_buckets.insert(bucket);
     }
 
-    for (auto bucket : erasedBuckets) {
+    for (auto bucket : erased_buckets) {
         delete bucket;
     }
     this->buckets.clear();
 }
 
-std::string ExtendibleHashtable::Hash(const std::string &pageId) const {
-    void *const buffer = (void *const)pageId.c_str();
-    XXH64_hash_t hash = XXH64(buffer, pageId.size(), 1);
-    return Utils::GetBinaryFromInt(hash, this->globalDepth);
+std::string ExtendibleHashtable::Hash(const std::string &page_id) const {
+    void *const buffer = (void *const)page_id.c_str();
+    XXH64_hash_t hash = XXH64(buffer, page_id.size(), 1);
+    return Utils::GetBinaryFromInt(hash, this->global_depth);
 }
 
 bool ExtendibleHashtable::ExpandDirectory() {
     // Can't expand if we already reached max directory depth
-    if (this->globalDepth == this->maxDepth) {
+    if (this->global_depth == this->max_depth) {
         return false;
     }
 
-    this->globalDepth++;
+    this->global_depth++;
     std::map<std::string, Bucket *> iterCopy(this->buckets.begin(), this->buckets.end());
-    for (auto const &[oldId, bucket] : iterCopy) {
+    for (auto const &[old_id, bucket] : iterCopy) {
         // Replace old ID with new expanded one. The overflowing bucket will have its "1" variant
         // pointing to a new bucket while the rest will have both new IDs point to the same bucket
-        this->buckets.emplace("0" + oldId, bucket);
-        this->buckets.emplace("1" + oldId, bucket);
-        this->buckets.erase(oldId);
+        this->buckets.emplace("0" + old_id, bucket);
+        this->buckets.emplace("1" + old_id, bucket);
+        this->buckets.erase(old_id);
     }
     return true;
 }
 
 void ExtendibleHashtable::Shrink() {
     // Can't shrink if we are still at min directory depth
-    if (this->globalDepth == this->minDepth) {
+    if (this->global_depth == this->min_depth) {
         return;
     }
 
     std::map<std::string, Bucket *> iterCopy(this->buckets.begin(), this->buckets.end());
-    for (auto const &[bucketId, bucket] : iterCopy) {
-        this->Merge(bucketId);
+    for (auto const &[bucket_id, bucket] : iterCopy) {
+        this->Merge(bucket_id);
     }
 
-    this->globalDepth--;
-    for (auto const &[oldId, bucket] : iterCopy) {
+    this->global_depth--;
+    for (auto const &[old_id, bucket] : iterCopy) {
         // Replace old ID with new shrunk one and erase the old ID. There are two old IDs that will
         // have same shrunken ID, but since we are using a map, this won't be a problem
-        this->buckets[oldId.substr(1)] = bucket;
-        this->buckets.erase(oldId);
+        this->buckets[old_id.substr(1)] = bucket;
+        this->buckets.erase(old_id);
     }
 }
 
 void ExtendibleHashtable::Insert(Page *page) {
-    std::string bucketId = this->Hash(page->GetPageId());
-    Bucket *bucket = this->buckets.at(bucketId);
+    std::string bucket_id = this->Hash(page->GetPageId());
+    Bucket *bucket = this->buckets.at(bucket_id);
     bucket->Insert(page);
     this->size++;
 
     // Split the bucket if the number of pages in the bucket reaches certain directory size threshold
-    if (bucket->GetSize() > this->bucketMaxSize && bucket->GetLocalDepth() < this->globalDepth) {
-        this->Split(bucketId);
+    if (bucket->GetSize() > this->bucket_max_size && bucket->GetLocalDepth() < this->global_depth) {
+        this->Split(bucket_id);
     }
 }
 
-Page *ExtendibleHashtable::Get(const std::string &pageId) {
-    std::string bucketId = this->Hash(pageId);
-    auto targetBucket = this->buckets.find(bucketId);
-    if (targetBucket == this->buckets.end()) {
+Page *ExtendibleHashtable::Get(const std::string &page_id) {
+    std::string bucket_id = this->Hash(page_id);
+    auto target_bucket = this->buckets.find(bucket_id);
+    if (target_bucket == this->buckets.end()) {
         return nullptr;
     }
-    return targetBucket->second->Get(pageId);
+    return target_bucket->second->Get(page_id);
 }
 
-void ExtendibleHashtable::Remove(Page *pageToEvict) {
-    std::string bucketId = this->Hash(pageToEvict->GetPageId());
-    Bucket *bucket = this->buckets.at(bucketId);
-    bucket->Remove(pageToEvict);
+void ExtendibleHashtable::Remove(Page *page_to_evict) {
+    std::string bucket_id = this->Hash(page_to_evict->GetPageId());
+    Bucket *bucket = this->buckets.at(bucket_id);
+    bucket->Remove(page_to_evict);
     this->size--;
 }
 
-void ExtendibleHashtable::Split(const std::string &bucketId) {
-    Bucket *overflowBucket = this->buckets.at(bucketId);
+void ExtendibleHashtable::Split(const std::string &bucket_id) {
+    Bucket *overflowBucket = this->buckets.at(bucket_id);
     overflowBucket->IncreaseLocalDepth();
 
-    // Always take "1" + oldId variant to replace with new bucket
-    std::string newBucketId = (bucketId.length() < this->globalDepth) ? "1" + bucketId : "1" + bucketId.substr(1);
-    std::string pairId = ExtendibleHashtable::GetPairBucketId(newBucketId);
-    if (this->buckets.at(newBucketId) == this->buckets.at(pairId)) {
-        this->buckets[newBucketId] = new Bucket(overflowBucket->GetLocalDepth());
+    // Always take "1" + old_id variant to replace with new bucket
+    std::string newBucket_id = (bucket_id.length() < this->global_depth) ? "1" + bucket_id : "1" + bucket_id.substr(1);
+    std::string pairId = ExtendibleHashtable::GetPairBucket_id(newBucket_id);
+    if (this->buckets.at(newBucket_id) == this->buckets.at(pairId)) {
+        this->buckets[newBucket_id] = new Bucket(overflowBucket->GetLocalDepth());
     }
 
     // Re-hash all the pages in overflowing bucket
@@ -124,9 +124,9 @@ void ExtendibleHashtable::Split(const std::string &bucketId) {
     }
 }
 
-void ExtendibleHashtable::Merge(const std::string &bucketId) {
-    Bucket *currBucket = this->buckets.at(bucketId);
-    std::string pairId = GetPairBucketId(bucketId);
+void ExtendibleHashtable::Merge(const std::string &bucket_id) {
+    Bucket *currBucket = this->buckets.at(bucket_id);
+    std::string pairId = GetPairBucket_id(bucket_id);
     Bucket *pairBucket = this->buckets.at(pairId);
 
     // No need to merge if both directories point at the same bucket
@@ -142,10 +142,10 @@ void ExtendibleHashtable::Merge(const std::string &bucketId) {
     }
     pairBucket->DecreaseLocalDepth();
     delete currBucket;
-    this->buckets[bucketId] = pairBucket;
+    this->buckets[bucket_id] = pairBucket;
 }
 
-int ExtendibleHashtable::GetGlobalDepth() const { return this->globalDepth; }
+int ExtendibleHashtable::GetGlobalDepth() const { return this->global_depth; }
 
 int ExtendibleHashtable::GetSize() const { return this->size; }
 
@@ -163,24 +163,24 @@ int ExtendibleHashtable::GetNumBuckets() const {
     return count;
 }
 
-void ExtendibleHashtable::SetMaxSize(int maxSize) {
-    this->maxDepth = std::floor(std::log2(maxSize));
-    if (this->minDepth > this->maxDepth) {  // Reduce minDepth if maxDepth is smaller
-        this->minDepth = this->maxDepth;
+void ExtendibleHashtable::SetMaxSize(int max_size) {
+    this->max_depth = std::floor(std::log2(max_size));
+    if (this->min_depth > this->max_depth) {  // Reduce min_depth if max_depth is smaller
+        this->min_depth = this->max_depth;
     }
-    while (this->globalDepth > this->maxDepth) {
+    while (this->global_depth > this->max_depth) {
         this->Shrink();
     }
 }
 
-void ExtendibleHashtable::SetMinSize(int minSize) {
-    this->minDepth = std::floor(std::log2(minSize));
-    if (this->maxDepth < this->minDepth) {  // Increment maxDepth if minDepth is bigger
-        this->maxDepth = this->minDepth;
+void ExtendibleHashtable::SetMinSize(int min_size) {
+    this->min_depth = std::floor(std::log2(min_size));
+    if (this->max_depth < this->min_depth) {  // Increment max_depth if min_depth is bigger
+        this->max_depth = this->min_depth;
     }
 }
 
-std::string ExtendibleHashtable::GetPairBucketId(const std::string &bucketId) {
-    std::string suffix = bucketId.substr(1);
-    return (bucketId.at(0) == '0') ? "1" + suffix : "0" + suffix;
+std::string ExtendibleHashtable::GetPairBucket_id(const std::string &bucket_id) {
+    std::string suffix = bucket_id.substr(1);
+    return (bucket_id.at(0) == '0') ? "1" + suffix : "0" + suffix;
 }

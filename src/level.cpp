@@ -6,45 +6,46 @@
 #include <filesystem>
 #include <iostream>
 
-Level::Level(int level, int bloomFilterBitsPerEntry, int inputBufferCapacity, int outputBufferCapacity) {
+Level::Level(int level, int bloom_filter_bits_per_entry, int input_buffer_capacity, int output_buffer_capacity) {
     this->level = level;
-    this->bloomFilterBitsPerEntry = bloomFilterBitsPerEntry;
-    this->sstFiles = {};
-    this->inputBufferCapacity = inputBufferCapacity;
-    this->outputBufferCapacity = outputBufferCapacity;
+    this->bloom_filter_bits_per_entry = bloom_filter_bits_per_entry;
+    this->sst_files = {};
+    this->input_buffer_capacity = input_buffer_capacity;
+    this->output_buffer_capacity = output_buffer_capacity;
 }
 
 Level::~Level() {
-    for (auto sstFile : this->sstFiles) {
-        delete sstFile;
+    for (auto sst_file : this->sst_files) {
+        delete sst_file;
     }
 }
 
 int Level::GetLevelNumber() const { return this->level; }
 
-void Level::WriteDataToLevel(std::vector<DataEntry_t> data, SearchType searchType, std::string &kvsPath) {
-    std::string fileName = Utils::GetFilenameWithExt(std::to_string(this->sstFiles.size()));
-    std::string filePath = kvsPath + "/" + Utils::LEVEL + std::to_string(this->level) + "-" + fileName;
-    uint64_t dataByteSize = data.size() * SST::KV_PAIR_BYTE_SIZE;
-    auto *bloomFilter = new BloomFilter(this->bloomFilterBitsPerEntry, data.size());
-    bloomFilter->InsertKeys(data);
-    SST *sstFile = new SST(filePath, dataByteSize, bloomFilter);
-    sstFile->SetupBTreeFile();
-    sstFile->SetInputReader(new InputReader(sstFile->GetMaxOffsetToReadLeaves(), this->inputBufferCapacity));
-    sstFile->SetScanInputReader(new ScanInputReader(this->inputBufferCapacity));
-    std::ofstream file(sstFile->GetFileName(), std::ios::out | std::ios::binary);
-    sstFile->WriteFile(file, data, searchType, true);
-    this->sstFiles.push_back(sstFile);
+void Level::WriteDataToLevel(std::vector<DataEntry_t> data, SearchType search_type, std::string &kvs_path) {
+    std::string file_name = Utils::GetFilenameWithExt(std::to_string(this->sst_files.size()));
+    std::string file_path = kvs_path + "/" + Utils::LEVEL + std::to_string(this->level) + "-" + file_name;
+    uint64_t data_byte_size = data.size() * SST::KV_PAIR_BYTE_SIZE;
+    BloomFilter *bloom_filter = new BloomFilter(this->bloom_filter_bits_per_entry, data.size());
+    bloom_filter->InsertKeys(data);
+    SST *sst_file = new SST(file_path, data_byte_size, bloom_filter);
+    sst_file->SetupBTreeFile();
+    sst_file->SetInputReader(new InputReader(sst_file->GetMaxOffsetToReadLeaves(), this->input_buffer_capacity));
+    sst_file->SetScanInputReader(new ScanInputReader(this->input_buffer_capacity));
+    std::ofstream file(sst_file->GetFileName(), std::ios::out | std::ios::binary);
+    sst_file->WriteFile(file, data, search_type, true);
+    this->sst_files.push_back(sst_file);
 }
 
-void WriteRemainingData(int fd, int index, BloomFilter *bloomFilter, InputReader *reader, OutputWriter *outputWriter) {
+void WriteRemainingData(int fd, int index, BloomFilter *bloom_filter, InputReader *reader,
+                        OutputWriter *output_writer) {
     while (index < reader->GetInputBufferSize()) {
         DataEntry_t entry = reader->GetEntry(index);
-        outputWriter->AddToOutputBuffer(entry);
-        bloomFilter->InsertKey(entry.first);
+        output_writer->AddToOutputBuffer(entry);
+        bloom_filter->InsertKey(entry.first);
         index += 2;
-        // In the edge case when sst1Reader has greater keys than the sst2Reader,
-        // make sure you read all the contents of sst1Reader.
+        // In the edge case when sst1_reader has greater keys than the sst2_reader,
+        // make sure you read all the contents of sst1_reader.
         if (index >= reader->GetInputBufferSize()) {
             reader->ReadDataPagesInBuffer(fd);
             index = 0;
@@ -52,89 +53,89 @@ void WriteRemainingData(int fd, int index, BloomFilter *bloomFilter, InputReader
     }
 }
 
-void Level::SortMergeAndWriteToNextLevel(Level *nextLevel, std::string &kvsPath) {
-    uint64_t sstDataSize = 0;
-    for (auto sstFile : this->sstFiles) {
-        sstDataSize += sstFile->GetFileDataSize();
+void Level::SortMergeAndWriteToNextLevel(Level *next_level, std::string &kvs_path) {
+    uint64_t sst_data_size = 0;
+    for (auto sst_file : this->sst_files) {
+        sst_data_size += sst_file->GetFileDataSize();
     }
 
     // Create and setup new SST file for sort-merged data
-    std::string fileName = Utils::GetFilenameWithExt(std::to_string(nextLevel->sstFiles.size()));
-    std::string filePath = kvsPath + "/" + Utils::LEVEL + std::to_string(nextLevel->level) + "-" + fileName;
-    int maxNumKeys = std::ceil(sstDataSize / SST::KV_PAIR_BYTE_SIZE);
-    auto *bloomFilter = new BloomFilter(this->bloomFilterBitsPerEntry, maxNumKeys);
-    SST *sortMergedFile = new SST(filePath, sstDataSize, bloomFilter);
+    std::string file_name = Utils::GetFilenameWithExt(std::to_string(next_level->sst_files.size()));
+    std::string file_path = kvs_path + "/" + Utils::LEVEL + std::to_string(next_level->level) + "-" + file_name;
+    int max_num_keys = std::ceil(sst_data_size / SST::KV_PAIR_BYTE_SIZE);
+    auto *bloom_filter = new BloomFilter(this->bloom_filter_bits_per_entry, max_num_keys);
+    SST *sort_merged_file = new SST(file_path, sst_data_size, bloom_filter);
 
-    sortMergedFile->SetupBTreeFile();
-    sortMergedFile->SetInputReader(
-        new InputReader(sortMergedFile->GetMaxOffsetToReadLeaves(), this->inputBufferCapacity));
-    sortMergedFile->SetScanInputReader(new ScanInputReader(this->inputBufferCapacity));
-    nextLevel->AddSSTFile(sortMergedFile);
+    sort_merged_file->SetupBTreeFile();
+    sort_merged_file->SetInputReader(
+        new InputReader(sort_merged_file->GetMaxOffsetToReadLeaves(), this->input_buffer_capacity));
+    sort_merged_file->SetScanInputReader(new ScanInputReader(this->input_buffer_capacity));
+    next_level->AddSSTFile(sort_merged_file);
 
     // Sort-merge data
-    int fd1 = Utils::OpenFile(this->sstFiles[0]->GetFileName());
+    int fd1 = Utils::OpenFile(this->sst_files[0]->GetFileName());
     if (fd1 == -1) {
         return;
     }
 
-    int fd2 = Utils::OpenFile(this->sstFiles[1]->GetFileName());
+    int fd2 = Utils::OpenFile(this->sst_files[1]->GetFileName());
     if (fd2 == -1) {
         return;
     }
 
     // InputReader will read 1 page of data from files at a time
-    InputReader *sst1Reader = this->sstFiles[0]->GetInputReader();
-    sst1Reader->ObtainOffsetToRead(fd1);
-    InputReader *sst2Reader = this->sstFiles[1]->GetInputReader();
-    sst2Reader->ObtainOffsetToRead(fd2);
+    InputReader *sst1_reader = this->sst_files[0]->GetInputReader();
+    sst1_reader->ObtainOffsetToRead(fd1);
+    InputReader *sst2_reader = this->sst_files[1]->GetInputReader();
+    sst2_reader->ObtainOffsetToRead(fd2);
 
-    // Consider the output buffer size to be this->bufferCapacity page
-    auto *outputWriter = new OutputWriter(sortMergedFile, this->outputBufferCapacity);
+    // Consider the output buffer size to be this->buffer_capacity page
+    auto *output_writer = new OutputWriter(sort_merged_file, this->output_buffer_capacity);
 
-    sst1Reader->ReadDataPagesInBuffer(fd1);
-    sst2Reader->ReadDataPagesInBuffer(fd2);
+    sst1_reader->ReadDataPagesInBuffer(fd1);
+    sst2_reader->ReadDataPagesInBuffer(fd2);
     int index1 = 0;
     int index2 = 0;
-    while (sst1Reader->GetInputBufferSize() && sst2Reader->GetInputBufferSize()) {
-        DataEntry_t entry1 = sst1Reader->GetEntry(index1);
-        DataEntry_t entry2 = sst2Reader->GetEntry(index2);
+    while (sst1_reader->GetInputBufferSize() && sst2_reader->GetInputBufferSize()) {
+        DataEntry_t entry1 = sst1_reader->GetEntry(index1);
+        DataEntry_t entry2 = sst2_reader->GetEntry(index2);
         if (entry1.first < entry2.first) {
-            outputWriter->AddToOutputBuffer(entry1);
-            bloomFilter->InsertKey(entry1.first);
+            output_writer->AddToOutputBuffer(entry1);
+            bloom_filter->InsertKey(entry1.first);
             index1 += 2;
         } else if (entry2.first < entry1.first) {
-            outputWriter->AddToOutputBuffer(entry2);
-            bloomFilter->InsertKey(entry2.first);
+            output_writer->AddToOutputBuffer(entry2);
+            bloom_filter->InsertKey(entry2.first);
             index2 += 2;
         } else {
             // It is an update/delete
-            outputWriter->AddToOutputBuffer(entry2);
-            bloomFilter->InsertKey(entry2.first);
+            output_writer->AddToOutputBuffer(entry2);
+            bloom_filter->InsertKey(entry2.first);
             index1 += 2;
             index2 += 2;
         }
 
-        if (index1 >= sst1Reader->GetInputBufferSize()) {
-            sst1Reader->ReadDataPagesInBuffer(fd1);
+        if (index1 >= sst1_reader->GetInputBufferSize()) {
+            sst1_reader->ReadDataPagesInBuffer(fd1);
             index1 = 0;
         }
-        if (index2 >= sst2Reader->GetInputBufferSize()) {
-            sst2Reader->ReadDataPagesInBuffer(fd2);
+        if (index2 >= sst2_reader->GetInputBufferSize()) {
+            sst2_reader->ReadDataPagesInBuffer(fd2);
             index2 = 0;
         }
     }
 
     // Write all the elements of the dataBuffer that still has remaining data to the output buffer
-    if (sst1Reader->GetInputBufferSize()) {
-        WriteRemainingData(fd1, index1, bloomFilter, sst1Reader, outputWriter);
-    } else if (sst2Reader->GetInputBufferSize()) {
-        WriteRemainingData(fd2, index2, bloomFilter, sst2Reader, outputWriter);
+    if (sst1_reader->GetInputBufferSize()) {
+        WriteRemainingData(fd1, index1, bloom_filter, sst1_reader, output_writer);
+    } else if (sst2_reader->GetInputBufferSize()) {
+        WriteRemainingData(fd2, index2, bloom_filter, sst2_reader, output_writer);
     }
 
-    int numPagesWrittenToFile = outputWriter->WriteEndOfFile();
+    int num_pages_written_to_file = output_writer->WriteEndOfFile();
     // We now have the exact number of pages of data that we wrote
     // to the B-tree's leaf level, so update the file's data size.
-    sortMergedFile->SetFileDataSize(numPagesWrittenToFile * SST::KV_PAIRS_PER_PAGE * SST::KV_PAIR_BYTE_SIZE);
+    sort_merged_file->SetFileDataSize(num_pages_written_to_file * SST::KV_PAIRS_PER_PAGE * SST::KV_PAIR_BYTE_SIZE);
 
     // Close files
     close(fd1);
@@ -144,13 +145,13 @@ void Level::SortMergeAndWriteToNextLevel(Level *nextLevel, std::string &kvsPath)
     Level::DeleteSSTFiles();
 }
 
-void Level::AddSSTFile(SST *sstFile) { this->sstFiles.push_back(sstFile); }
+void Level::AddSSTFile(SST *sst_file) { this->sst_files.push_back(sst_file); }
 
-std::vector<SST *> Level::GetSSTFiles() { return this->sstFiles; }
+std::vector<SST *> Level::GetSSTFiles() { return this->sst_files; }
 
 void Level::DeleteSSTFiles() {
-    for (auto sstFile : this->sstFiles) {
-        std::filesystem::remove(sstFile->GetFileName());
+    for (auto sst_file : this->sst_files) {
+        std::filesystem::remove(sst_file->GetFileName());
     }
-    this->sstFiles = {};
+    this->sst_files = {};
 }

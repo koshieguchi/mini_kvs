@@ -11,17 +11,16 @@
  */
 class Memtable {
    private:
-    /* data */
-    RedBlackTree *redBlackTree;
-    int maxSize;
+    RedBlackTree *red_black_tree;
+    int max_size;
 
    public:
     /**
      * Constructor for a Memtable object.
      *
-     * @param maxSize the maximum key-value entries the memtable can hold.
+     * @param max_size the maximum key-value entries the memtable can hold.
      */
-    explicit Memtable(int maxSize);
+    explicit Memtable(int max_size);
 
     ~Memtable();
 

@@ -1,6 +1,6 @@
 
-#ifndef EVICTIONPOLICY_H
-#define EVICTIONPOLICY_H
+#ifndef EVICTION_POLICY_H
+#define EVICTION_POLICY_H
 
 #include "page.h"
 
@@ -15,9 +15,9 @@ class EvictionPolicy {
      * Update the eviction policy backend when a page in the buffer pool
      * is being accessed.
      *
-     * @param accessedPage the Page object accessed.
+     * @param accessed_page the Page object accessed.
      */
-    virtual void UpdatePageAccessStatus(Page *accessedPage) {};
+    virtual void UpdatePageAccessStatus(Page *accessed_page) {};
 
     /**
      * Update the eviction policy backend when a new page is inserted into
@@ -35,4 +35,4 @@ class EvictionPolicy {
     virtual Page *GetPageToEvict() { return nullptr; }
 };
 
-#endif  // EVICTIONPOLICY_H
+#endif  // EVICTION_POLICY_H

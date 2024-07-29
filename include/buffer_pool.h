@@ -1,6 +1,6 @@
 
-#ifndef BUFFERPOOL_H
-#define BUFFERPOOL_H
+#ifndef BUFFER_POOL_H
+#define BUFFER_POOL_H
 
 #include <cstdint>
 #include <string>
@@ -21,36 +21,35 @@ class BufferPool {
     void Evict();
 
    public:
-    BufferPool(int minSize, int maxSize, EvictionPolicyType evictionPolicyType);
+    BufferPool(int min_size, int max_size, EvictionPolicyType eviction_policy_type);
 
     ~BufferPool();
 
     /**
-     * Searches for page associated with given pageId in the buffer pool.
+     * Searches for page associated with given page_id in the buffer pool.
      *
-     * @param key
-     * @param pageKey
+     * @param page_id
      * @return
      */
-    std::vector<uint64_t> Get(const std::string &pageId);
+    std::vector<uint64_t> Get(const std::string &page_id);
 
     /**
      * Resize the max size of the buffer pool. Triggers eviction if new max size is
      * smaller than current size.
      *
-     *   # of evict = ceil(# of current pages - (expansion threshold * newMaxSize))
+     *   # of evict = ceil(# of current pages - (expansion threshold * new_max_size))
      *
-     * @param newMaxSize
+     * @param new_max_size
      */
-    void Resize(int newMaxSize);
+    void Resize(int new_max_size);
 
     /**
      * Create a new page with given ID and data and insert it into the buffer pool.
      *
-     * @param pageId the ID of the page.
+     * @param page_id the ID of the page.
      * @param data the data of the page.
      */
-    void Insert(const std::string &pageId, std::vector<uint64_t> &data);
+    void Insert(const std::string &page_id, std::vector<uint64_t> &data);
 };
 
-#endif  // BUFFERPOOL_H
+#endif  // BUFFER_POOL_H

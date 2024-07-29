@@ -38,13 +38,13 @@ class Node {
 
     bool GetColor() { return this->color; }
 
-    void SetLeftChild(Node *newLeft) { this->left = newLeft; }
+    void SetLeftChild(Node *new_left) { this->left = new_left; }
 
-    void SetRightChild(Node *newRight) { this->right = newRight; }
+    void SetRightChild(Node *new_right) { this->right = new_right; }
 
-    void SetParent(Node *newParent) { this->parent = newParent; }
+    void SetParent(Node *new_parent) { this->parent = new_parent; }
 
-    void SetColor(Color newColor) { this->color = newColor; }
+    void SetColor(Color new_color) { this->color = new_color; }
 };
 
 #endif  // NODE_H

@@ -25,34 +25,34 @@ enum SearchType { BINARY_SEARCH = 0, B_TREE_SEARCH = 1 };
  */
 class SST {
    private:
-    std::string fileName;
-    uint64_t fileDataByteSize;
-    std::vector<BTreeLevel *> bTreeLevels;  // Used when the sst file is a static B-tree
-    BloomFilter *bloomFilter;
-    uint64_t maxOffsetToReadLeaves;
-    InputReader *inputReader;
-    ScanInputReader *scanInputReader;
+    std::string file_name;
+    uint64_t file_data_byte_size;
+    std::vector<BTreeLevel *> b_tree_levels;  // Used when the sst file is a static B-tree
+    BloomFilter *bloom_filter;
+    uint64_t max_offset_to_readLeaves;
+    InputReader *input_reader;
+    ScanInputReader *scan_input_reader;
 
     /**
-     * Gets the the pageId of a page of a file to use as a key in the buffer pool.
+     * Gets the the page_id of a page of a file to use as a key in the buffer pool.
      *
-     * @param offsetToRead
+     * @param offset_to_read
      */
-    std::string GetPageIdInBufferPool(uint64_t offsetToRead) {
-        return this->fileName + "-" + std::to_string(offsetToRead);
+    std::string GetPageIdInBufferPool(uint64_t offset_to_read) {
+        return this->file_name + "-" + std::to_string(offset_to_read);
     }
 
     static void WriteExtraToAlign(std::ofstream &file, uint64_t extraSpace);
 
-    void AddNextInternalLevelFenceKeys(std::vector<uint64_t> &data, int nextLevel);
+    void AddNextInternalLevelFenceKeys(std::vector<uint64_t> &data, int next_level);
 
     /**
      * Write B-Tree internal nodes into the SST file.
      *
      * @param file the file stream of the SST file.
-     * @param endOfFile flag to determine whether it's the end of the file or not.
+     * @param end_of_file flag to determine whether it's the end of the file or not.
      */
-    void WriteBTreeInternalLevels(std::ofstream &file, bool endOfFile);
+    void WriteBTreeInternalLevels(std::ofstream &file, bool end_of_file);
 
     /**
      * Write B-Tree structure metadata to the SST file.
@@ -68,43 +68,43 @@ class SST {
      */
     void WriteBloomFilter(std::ofstream &file);
 
-    std::vector<uint64_t> GetBTreeLevelOffsets(int leavesNumPages);
+    std::vector<uint64_t> GetBTreeLevelOffsets(int leaves_num_pages);
 
     /**
      * Try to obtain page from buffer pool with given page ID. If page isn't in the buffer
      * pool, try to obtain the page data from the file with given file description and offset.
      *
-     * @param pageId the page ID of the page in buffer pool.
+     * @param page_id the page ID of the page in buffer pool.
      * @param fd the file description of SST file containing the page.
      * @param offset the offset of the page in the SST file.
-     * @param bufferPool the buffer pool.
+     * @param buffer_pool the buffer pool.
      * @return a vector containing the page data.
      */
-    static std::vector<uint64_t> GetPage(const std::string &pageId, int fd, uint64_t offset, BufferPool *bufferPool);
+    static std::vector<uint64_t> GetPage(const std::string &page_id, int fd, uint64_t offset, BufferPool *buffer_pool);
 
-    static std::vector<uint64_t> GetBloomFilterPages(const std::string &pageId, int fd, uint64_t offset,
-                                                     uint64_t numPages, BufferPool *bufferPool);
+    static std::vector<uint64_t> GetBloomFilterPages(const std::string &page_id, int fd, uint64_t offset,
+                                                     uint64_t num_pages, BufferPool *buffer_pool);
 
     /**
      * Read SST file to obtain given number of pages of bloom filters.
      *
      * @param fd the file descriptor of the SST file.
      * @param offset the offset in the file to the bloom filter.
-     * @param numPagesToRead number of bloom filter pages to read.
+     * @param num_pages_to_read number of bloom filter pages to read.
      * @return bloom filter array read from the file.
      */
-    static std::vector<uint64_t> ReadBloomFilter(int fd, uint64_t offset, uint64_t numPagesToRead);
+    static std::vector<uint64_t> ReadBloomFilter(int fd, uint64_t offset, uint64_t num_pages_to_read);
 
     /**
      * Searches for key in the B-Tree file given the file offset and descriptor.
      *
      * @param fd the file descriptor of the B-Tree SST file.
      * @param key the key to search for.
-     * @param bufferPool the DB buffer pool.
-     * @param levelsPageOffsets the file offsets for B-Tree levels.
+     * @param buffer_pool the DB buffer pool.
+     * @param levels_page_offsets the file offsets for B-Tree levels.
      * @return the value if key is found, INVALID_VALUE is not.
      */
-    uint64_t FindKeyInBTree(int fd, uint64_t key, BufferPool *bufferPool, std::vector<uint64_t> &levelsPageOffsets);
+    uint64_t FindKeyInBTree(int fd, uint64_t key, BufferPool *buffer_pool, std::vector<uint64_t> &levels_page_offsets);
 
    public:
     // Size of one page of memory
@@ -117,18 +117,18 @@ class SST {
     /**
      * Constructor for a SST object.
      *
-     * @param fileName the name of the SST file.
-     * @param fileDataByteSize the size of the file in bytes.
-     * @param bloomFilter the bloom filter associated with the SST file.
+     * @param file_name the name of the SST file.
+     * @param file_data_byte_size the size of the file in bytes.
+     * @param bloom_filter the bloom filter associated with the SST file.
      */
-    explicit SST(std::string &fileName, uint64_t fileDataByteSize = 0, BloomFilter *bloomFilter = nullptr);
+    explicit SST(std::string &file_name, uint64_t file_data_byte_size = 0, BloomFilter *bloom_filter = nullptr);
 
     ~SST() {
-        delete this->bloomFilter;
-        for (auto bTreeLevel : this->bTreeLevels) {
-            delete bTreeLevel;
+        delete this->bloom_filter;
+        for (auto b_tree_level : this->b_tree_levels) {
+            delete b_tree_level;
         }
-        this->bTreeLevels.clear();
+        this->b_tree_levels.clear();
     }
 
     /**
@@ -144,9 +144,9 @@ class SST {
     /**
      * Set the data size of the SST file in bytes.
      *
-     * @param fileDataByteSize new file data size in bytes.
+     * @param file_data_byte_size new file data size in bytes.
      */
-    void SetFileDataSize(uint64_t fileDataByteSize);
+    void SetFileDataSize(uint64_t file_data_byte_size);
 
     /**
      * Get the input buffer reader of the SST file.
@@ -156,9 +156,9 @@ class SST {
     /**
      * Set the input buffer reader of the SST file.
      *
-     * @param inputReader new input buffer reader for SST file.
+     * @param input_reader new input buffer reader for SST file.
      */
-    void SetInputReader(InputReader *inputReader);
+    void SetInputReader(InputReader *input_reader);
 
     /**
      * Get maximum offset to read the leaves level of the B-Tree structure for
@@ -174,9 +174,9 @@ class SST {
     /**
      * Set the scan input buffer reader of the SST file.
      *
-     * @param inputReader new scan input buffer reader for SST file.
+     * @param input_reader new scan input buffer reader for SST file.
      */
-    void SetScanInputReader(ScanInputReader *scanInputReader);
+    void SetScanInputReader(ScanInputReader *scan_input_reader);
 
     /**
      * Set up the SST file for B-Tree data structure.
@@ -188,9 +188,9 @@ class SST {
      *
      * @param file the file stream of the SST file.
      * @param data the level data to write.
-     * @param endOfFile flag to determine whether it's the end of the file or not.
+     * @param end_of_file flag to determine whether it's the end of the file or not.
      */
-    void WriteBTreeLevels(std::ofstream &file, std::vector<DataEntry_t> &data, bool endOfFile);
+    void WriteBTreeLevels(std::ofstream &file, std::vector<DataEntry_t> &data, bool end_of_file);
 
     /**
      * Write the end of the B-Tree SST file including B-Tree metadata and bloom filter.
@@ -202,14 +202,14 @@ class SST {
     void WriteEndOfBTreeFile(std::ofstream &file);
 
     /**
-     * Write given key-value data into a SST file with given fileName.
+     * Write given key-value data into a SST file with given file_name.
      *
      * @param file the file stream of the SST file.
      * @param data the data to write into the file.
-     * @param searchType the search type of the file (binary search or B-Tree search)
-     * @param endOfFile flag to determine whether it's the end of the file or not.
+     * @param search_type the search type of the file (binary search or B-Tree search)
+     * @param end_of_file flag to determine whether it's the end of the file or not.
      */
-    void WriteFile(std::ofstream &file, std::vector<DataEntry_t> &data, SearchType searchType, bool endOfFile);
+    void WriteFile(std::ofstream &file, std::vector<DataEntry_t> &data, SearchType search_type, bool end_of_file);
 
     /**
      * Read pages of data off of file with given file descriptor at given offset and
@@ -217,10 +217,10 @@ class SST {
      *
      * @param fd the file description of SST file containing the page.
      * @param offset the offset of the page in the SST file.
-     * @param numPagesToRead number of pages to read from the file.
+     * @param num_pages_to_read number of pages to read from the file.
      * @return a vector containing the page data read from file.
      */
-    static std::vector<uint64_t> ReadPagesOfFile(int fd, uint64_t offset, uint64_t numPagesToRead = 1);
+    static std::vector<uint64_t> ReadPagesOfFile(int fd, uint64_t offset, uint64_t num_pages_to_read = 1);
 
     /**
      * Read SST file to obtain B-Tree level offsets metadata.
@@ -234,29 +234,29 @@ class SST {
      * Queries for value with given key using binary search.
      *
      * @param key the key to search for.
-     * @param bufferPool the DB buffer pool.
+     * @param buffer_pool the DB buffer pool.
      * @return the value if key is found, INVALID_VALUE otherwise.
      */
-    uint64_t PerformBinarySearch(uint64_t key, BufferPool *bufferPool);
+    uint64_t PerformBinarySearch(uint64_t key, BufferPool *buffer_pool);
 
     /**
      * Queries for value with given key using B-Tree search.
      *
      * @param key the key to search for.
-     * @param bufferPool the DB buffer pool.
-     * @param isLSMTree flag to determine whether DB is using LSM-Tree or not.
+     * @param buffer_pool the DB buffer pool.
+     * @param is_lsm_tree flag to determine whether DB is using LSM-Tree or not.
      * @return the value if key is found, INVALID_VALUE otherwise.
      */
-    uint64_t PerformBTreeSearch(uint64_t key, BufferPool *bufferPool, bool isLSMTree);
+    uint64_t PerformBTreeSearch(uint64_t key, BufferPool *buffer_pool, bool is_lsm_tree);
 
     /**
      * Scans for data whose key is within the range of [key1 and key2] using binary search.
      *
      * @param key1 the lower bound of scan result.
      * @param key2 the upper bound of scan result.
-     * @param scanResult the vector to put scan results in.
+     * @param scan_result the vector to put scan results in.
      */
-    void PerformBinaryScan(uint64_t key1, uint64_t key2, std::vector<DataEntry_t> &scanResult);
+    void PerformBinaryScan(uint64_t key1, uint64_t key2, std::vector<DataEntry_t> &scan_result);
 
     /**
      * Read SST file to obtain starting offset in leaves level in B-Tree structure for
@@ -273,9 +273,9 @@ class SST {
      *
      * @param key1 the lower bound of scan result.
      * @param key2 the upper bound of scan result.
-     * @param scanResult the vector to put scan results in.
+     * @param scan_result the vector to put scan results in.
      */
-    void PerformBTreeScan(uint64_t key1, uint64_t key2, std::vector<DataEntry_t> &scanResult);
+    void PerformBTreeScan(uint64_t key1, uint64_t key2, std::vector<DataEntry_t> &scan_result);
 };
 
 #endif  // SST_H

@@ -9,20 +9,20 @@ void Clock::Insert(Page *page) {
     page->SetAccessBit(0);
 }
 
-void Clock::UpdatePageAccessStatus(Page *accessedPage) { accessedPage->SetAccessBit(1); }
+void Clock::UpdatePageAccessStatus(Page *accessed_page) { accessed_page->SetAccessBit(1); }
 
 Page *Clock::GetPageToEvict() {
     auto it = std::next(this->pages.begin(), this->handle);
-    Page *curPage = *it;
-    while (curPage->GetAccessBit()) {
-        curPage->SetAccessBit(0);
+    Page *cur_page = *it;
+    while (cur_page->GetAccessBit()) {
+        cur_page->SetAccessBit(0);
         this->handle++;
         ++it;
         if (it == this->pages.end()) {
             it = this->pages.begin();
             this->handle = 0;
         }
-        curPage = *it;
+        cur_page = *it;
     }
 
     // Delete the evicted page from pages
@@ -33,5 +33,5 @@ Page *Clock::GetPageToEvict() {
     if (this->handle >= this->pages.size()) {
         this->handle = 0;
     }
-    return curPage;
+    return cur_page;
 }

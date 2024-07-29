@@ -24,24 +24,24 @@ const std::string LEVEL = "level";
  * @param key the key to find
  * @return index of the key if found.
  */
-int BinarySearch(std::vector<uint64_t> keys, uint64_t key, int startIndex = 0);
+int BinarySearch(std::vector<uint64_t> keys, uint64_t key, int start_index = 0);
 
 /**
- * Converts an integer to its binary form and taking <numBits> number
+ * Converts an integer to its binary form and taking <num_bits> number
  * of least significant bits.
  *
  * @param integer integer to get binary string of.
- * @param numBits the number of LSB bits.
- * @return numBits number of LSB of the binary string of the given integer.
+ * @param num_bits the number of LSB bits.
+ * @return num_bits number of LSB of the binary string of the given integer.
  */
-std::string GetBinaryFromInt(uint64_t integer, int numBits);
+std::string GetBinaryFromInt(uint64_t integer, int num_bits);
 
 /**
- * Returns a fileName with ".sst" extension added.
+ * Returns a file_name with ".sst" extension added.
  *
- * @param fileName filename to add SST extension to.
+ * @param file_name filename to add SST extension to.
  */
-std::string GetFilenameWithExt(const std::string &fileName);
+std::string GetFilenameWithExt(const std::string &file_name);
 
 /**
  * Extract the keys from the key-value pairs in the input data.
@@ -54,10 +54,10 @@ std::vector<uint64_t> GetKeys(std::vector<uint64_t> &data);
 /**
  * Opens the file at given filename. Prints out error if the operation fails.
  *
- * @param fileName the file to open
+ * @param file_name the file to open
  * @return the file descriptor created by opening the file.
  */
-int OpenFile(const std::string &fileName);
+int OpenFile(const std::string &file_name);
 
 /**
  * Ensures the given directory has a slash at the end.

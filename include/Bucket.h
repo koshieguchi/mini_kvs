@@ -13,8 +13,8 @@
 class Bucket {
    private:
     std::forward_list<Page *> pages;
-    // Number of bits used by the bucket so far, out of the total globalDepth bits of the hashtable.
-    int localDepth;
+    // Number of bits used by the bucket so far, out of the total global_depth bits of the hashtable.
+    int local_depth;
     // Number of pages mapped to this bucket.
     int size;
 
@@ -34,21 +34,21 @@ class Bucket {
      * @param key
      * @return
      */
-    Page *Get(const std::string &pageId);
+    Page *Get(const std::string &page_id);
 
     /**
      * Insert a new Page object into the bucket chain.
      *
-     * @param newPage
+     * @param new_page
      */
-    void Insert(Page *newPage);
+    void Insert(Page *new_page);
 
     /**
      * Remove the given Page object from the bucket chain.
      *
-     * @param pageToRemove
+     * @param page_to_remove
      */
-    void Remove(Page *pageToRemove);
+    void Remove(Page *page_to_remove);
 
     /**
      * Get the number of pages mapped to current bucket.

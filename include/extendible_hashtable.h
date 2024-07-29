@@ -1,6 +1,6 @@
 
-#ifndef EXTENDIBLEHASHTABLE_H
-#define EXTENDIBLEHASHTABLE_H
+#ifndef EXTENDIBLE_HASHTABLE_H
+#define EXTENDIBLE_HASHTABLE_H
 
 #include <cstdint>
 #include <vector>
@@ -13,41 +13,41 @@
  */
 class ExtendibleHashtable {
    private:
-    // Current number of bits used to create directory entries (i.e. 2^globalDepth directory entries).
-    int globalDepth;
-    // Min and initial number of bits used to create directory entries (i.e. 2^minDepth directory entries).
-    int minDepth;
-    // Max number of bits allowed to be used to expand the number of directory entries (i.e. 2^maxDepth directory
+    // Current number of bits used to create directory entries (i.e. 2^global_depth directory entries).
+    int global_depth;
+    // Min and initial number of bits used to create directory entries (i.e. 2^min_depth directory entries).
+    int min_depth;
+    // Max number of bits allowed to be used to expand the number of directory entries (i.e. 2^max_depth directory
     // entries).
-    int maxDepth;
+    int max_depth;
     // Max number of pages mapped to a bucket to make sure we maintain a O(1) access.
-    int bucketMaxSize;
+    int bucket_max_size;
     // Total number of pages mapped to this extendible hashtable.
     int size;
-    // Map of dir entries (i.e. bucketId) to their corresponding bucket.
+    // Map of dir entries (i.e. bucket_id) to their corresponding bucket.
     std::map<std::string, Bucket *> buckets;
 
     // Private methods
-    [[nodiscard]] std::string Hash(const std::string &pageId) const;
+    [[nodiscard]] std::string Hash(const std::string &page_id) const;
 
-    void Split(const std::string &bucketId);
+    void Split(const std::string &bucket_id);
 
-    void Merge(const std::string &bucketId);
+    void Merge(const std::string &bucket_id);
 
    public:
     constexpr static const float EXPAND_THRESHOLD = 0.8;
 
-    ExtendibleHashtable(int minSize, int maxSize, int bucketMaxSize = 1);
+    ExtendibleHashtable(int min_size, int max_size, int bucket_max_size = 1);
 
     ~ExtendibleHashtable();
 
     /**
      * Fetch the Page object given it's page ID.
      *
-     * @param pageId
+     * @param page_id
      * @return the Page object associated with the ID.
      */
-    Page *Get(const std::string &pageId);
+    Page *Get(const std::string &page_id);
 
     /**
      * Insert the given new Page object into the hash table.
@@ -59,9 +59,9 @@ class ExtendibleHashtable {
     /**
      * Remove the given Page object from the hash table.
      *
-     * @param pageToEvict Page object to be removed.
+     * @param page_to_evict Page object to be removed.
      */
-    void Remove(Page *pageToEvict);
+    void Remove(Page *page_to_evict);
 
     /**
      * Tries to expand the directory size if possible (e.g., below max size).
@@ -89,19 +89,19 @@ class ExtendibleHashtable {
      */
     [[nodiscard]] int GetNumBuckets() const;
 
-    void SetMaxSize(int maxSize);
+    void SetMaxSize(int max_size);
 
-    void SetMinSize(int minSize);
+    void SetMinSize(int min_size);
 
     /**
      * Gets the pair bucket ID of the given bucket ID.
      *
      * For example, "101" would have a pair bucket ID of "001".
      *
-     * @param bucketId the bucket ID
+     * @param bucket_id the bucket ID
      * @return the pair bucket ID
      */
-    static std::string GetPairBucketId(const std::string &bucketId);
+    static std::string GetPairBucket_id(const std::string &bucket_id);
 };
 
-#endif  // EXTENDIBLEHASHTABLE_H
+#endif  // EXTENDIBLE_HASHTABLE_H

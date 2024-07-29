@@ -2,39 +2,40 @@
 
 #include <iostream>
 
-InputReader::InputReader(uint64_t maxOffsetToRead, int capacity) {
-    this->inputBuffer = {};
-    this->offsetToRead = 0;
-    this->bufferCapacity = capacity;
-    this->maxOffsetToRead = maxOffsetToRead;
+InputReader::InputReader(uint64_t max_offset_to_read, int capacity) {
+    this->input_buffer = {};
+    this->offset_to_read = 0;
+    this->buffer_capacity = capacity;
+    this->max_offset_to_read = max_offset_to_read;
 }
 
 void InputReader::ObtainOffsetToRead(int fd) {
-    this->levelOffsets = SST::ReadBTreeLevelOffsets(fd);
+    this->level_offsets = SST::ReadBTreeLevelOffsets(fd);
 
     // Get the offset of where the B-tree's leaves starts
-    this->offsetToRead = this->levelOffsets[this->levelOffsets.size() - 1];
+    this->offset_to_read = this->level_offsets[this->level_offsets.size() - 1];
 }
 
 void InputReader::ReadDataPagesInBuffer(int fd) {
-    this->inputBuffer.clear();
-    if (this->offsetToRead > this->maxOffsetToRead) {
+    this->input_buffer.clear();
+    if (this->offset_to_read > this->max_offset_to_read) {
         return;
     }
 
-    uint64_t numDataPagesToRead = std::min(this->bufferCapacity, this->maxOffsetToRead - this->offsetToRead + 1);
-    this->inputBuffer = SST::ReadPagesOfFile(fd, this->offsetToRead, numDataPagesToRead);
-    this->offsetToRead += numDataPagesToRead;
+    uint64_t num_data_pages_to_read =
+        std::min(this->buffer_capacity, this->max_offset_to_read - this->offset_to_read + 1);
+    this->input_buffer = SST::ReadPagesOfFile(fd, this->offset_to_read, num_data_pages_to_read);
+    this->offset_to_read += num_data_pages_to_read;
 }
 
 DataEntry_t InputReader::GetEntry(int index) {
-    DataEntry_t entry = std::make_pair(this->inputBuffer[index], this->inputBuffer[index + 1]);
-    if (this->inputBuffer[index] == Utils::INVALID_VALUE) {
+    DataEntry_t entry = std::make_pair(this->input_buffer[index], this->input_buffer[index + 1]);
+    if (this->input_buffer[index] == Utils::INVALID_VALUE) {
         // The number of entries in the file has not been page-aligned,
         // and we have reached the end of the file, so we should stop reading.
-        this->inputBuffer.clear();
+        this->input_buffer.clear();
     }
     return entry;
 }
 
-uint64_t InputReader::GetInputBufferSize() { return this->inputBuffer.size(); }
+uint64_t InputReader::GetInputBufferSize() { return this->input_buffer.size(); }
